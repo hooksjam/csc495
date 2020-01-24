@@ -351,3 +351,11 @@ body {
 .deleteDialog p {
   font-size:12px;
 }
+
+.MuiTooltip-tooltip {
+  font-size:1.5em !important;
+}
+
+.MuiButton-label {
+  font-size:2em;
+}

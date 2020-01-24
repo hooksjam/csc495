@@ -6,6 +6,7 @@ import { registration } from './RegistrationReducer';
 import { users } from './UserReducer';
 import { alert } from './AlertReducer';
 import { form } from './FormReducer';
+import { query } from './QueryReducer';
 
 const rootReducer = (history) => combineReducers({
   router : connectRouter(history),
@@ -14,6 +15,7 @@ const rootReducer = (history) => combineReducers({
   users,
   alert,
   form,
+  query
 });
 
 export default rootReducer;

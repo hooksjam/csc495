@@ -9,6 +9,7 @@
         "test": "NODE_ENV=test mocha --require @babel/register ./server/tests/*.js  --timeout 10000 --exit",
         "serve": "nodemon main.js",
         "start": "export NODE_ENV=development && npm run serve",
+        "startwin": "SET NODE_ENV=development && node main.js",
         "build": "export NODE_ENV=production && npm run prod",
         "prodServer": "npm run build && node dist/server.js",
         "devServer": "webpack --mode development --config webpack.server.config.js && npm run serve",

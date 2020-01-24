@@ -4,3 +4,4 @@ export * from './UserActions';
 export * from './SDCMiddleware';
 export * from './SDCFormIterator';
 export * from './SDCResponseBuilder';
+export * from './QueryActions';

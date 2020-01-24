@@ -165,5 +165,74 @@ export default (passport) => {
 		})
 	})
 
+
+	/**
+	 * Test queries
+	 */
+	 router.put('/test', (req, res) => {
+	 	elasticSearch.hasClient()
+	 	.then(clientExists => {
+	 		if(clientExists && !req.query.fallback) {
+	 			testQueryElastic(req, res)
+		 	} else {
+		 		res.sendStatus(400)
+		 	}
+	 	})
+	})
+	function testQueryElastic(req, res) {
+		if(req.body.queries && req.body.queries.length > 0) {
+			var promises = req.body.queries.map(x => {
+				return elasticSearch.searchRaw(x)
+			})
+
+			Promise.all(promises)
+			.then(x => {
+				console.log("Success!",x)
+				// Intersect hits
+				var formIDs = {}
+				for(let i = 0; i < x.length; i++) {
+					var nextSet = {}
+					console.log("Query", JSON.stringify(x[i].query))
+					console.log("Hits", x[i].answer.hits.length)
+					for(let j = 0; j < x[i].answer.hits.length; j++) {
+						console.log("HIT!", x[i].answer.hits[j].responseID)
+						var answer = x[i].answer.hits[j]
+						if(i == 0) {
+							nextSet[answer.responseID] = 1
+						} else {
+							if(answer.responseID in formIDs) {
+								nextSet[answer.responseID] = 1
+							}
+						}
+
+					}
+					formIDs = nextSet
+				}
+				console.log("Matches", Object.keys(formIDs).length)
+				res.send({
+					result: Object.keys(formIDs),
+					raw:x
+				})
+			})
+			.catch(err => {
+	 			util.errorMessage(res, err, "query failed")
+			})
+		} else {
+	 		util.errorMessage(res, "no queries")
+		}
+	}	
+
+	router.get('/result/:responseID', (req, res) => {
+    	SDCPersistentLink.findOne({"response._id": req.params.responseID}, (err, link) => {
+    		if(err) {
+    			util.errorMessage(res, err, "getting response")
+    		}
+
+    		console.log("Found link") 
+    		console.log(link)
+    		res.redirect('/persistent/'+link.link)
+    	})
+	})
+
 	return router
 }

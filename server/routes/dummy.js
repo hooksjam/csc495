@@ -476,6 +476,7 @@ export default (passport) => {
 		.then(() => {
 			return new Promise((resolve, reject) => {
 				if(req.query.clear != 0) { 
+					console.log("Clearing index")
 					elastic.deleteIndex() 
 					.then(elastic.initIndex)
 					.then(resolve)
@@ -567,6 +568,10 @@ export default (passport) => {
 	router.get('/reset', (req, res) => {
 		res.redirect('/api/dummy?clear=1&forms=1&form=Adrenal.Bx.Res.129_3.003.001.REL_sdcFDF&responses=10&answers=1')
 	})
+
+	router.get('/test', (req, res) => {
+		res.redirect('/api/dummy?clear=1&forms=1&form=PKG_LDCT_LUNG&responses=10&answers=1')
+	})	
 	
 	router.get('/clear', (req, res) => {
 		clearForms()

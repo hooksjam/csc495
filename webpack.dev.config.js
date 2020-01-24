@@ -58,16 +58,6 @@ module.exports = {
                     loader: "html-loader",
                 }
             },
-            {
-                test: /\.ejs$/,
-                use: {
-                    loader: "ejs-loader",
-                    query: {
-                        interpolate: /\{\{(.+?)\}\}/g,
-                        evaluate: /\[\[(.+?)\]\]/g
-                    }
-                }
-            },
             { 
                 test: /\.css$/,
                 use: [ 'style-loader', 'css-loader' ]
