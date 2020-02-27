@@ -1,26 +1,28 @@
 import React from 'react';
+
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 
 import { UserActions } from 'Actions';
+import { MenuOption } from 'Components'
 
 class HomePage extends React.Component {
     componentDidMount() {
-        this.props.getUsers();
-    }
-
-    handleDeleteUser(id) {
-        return (e) => this.props.deleteUser(id);
+        //this.props.getUsers();
     }
 
     render() {
         const { user, users } = this.props;
         return (
             <div className="col-md-6 col-md-offset-3">
-                <h1>Hi {user.firstName}!</h1>
-                <p>You're logged in with React!!</p>
-                <h3>All registered users:</h3>
-                {users.loading && <em>Loading users...</em>}
+                <h1>Diagnostic Aid </h1>
+                <MenuOption> 
+                    <h2> Patients </h2>
+                </MenuOption>
+                <MenuOption> 
+                    <h2> Input Form </h2>
+                </MenuOption>
+                {/*{users.loading && <em>Loading users...</em>}
                 {users.error && <span className="text-danger">ERROR: {users.error}</span>}
                 {users.items &&
                     <ul>
@@ -41,7 +43,7 @@ class HomePage extends React.Component {
                 </p>
                 <p>
                     <Link to="/test">Test the form parser</Link>
-                </p>
+                </p>*/}
             </div>
         );
     }
@@ -55,7 +57,7 @@ function mapState(state) {
 
 const actionCreators = {
     getUsers: UserActions.getAll,
-    deleteUser: UserActions.delete
+    //deleteUser: UserActions.delete
 }
 
 const connectedHomePage = connect(mapState, actionCreators)(HomePage);

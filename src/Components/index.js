@@ -1,4 +1,5 @@
-export * from './PrivateRoute';
+export * from './PrivateRoute'
 export * from './Form'
-export * from './Dialog';
+export * from './Dialog'
 export * from './Query'
+export * from './Home'

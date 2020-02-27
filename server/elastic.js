@@ -394,31 +394,17 @@ function transformElasticResult(x, body) {
 					resolve()
 				} else {
 					indexAnswers(queryAnswers)
-					.then(() => {
+					.catch(reject)
+					/*.then(() => {
 						warehouseAnswers(queryAnswers)
 						.then(resolve)
 						.catch(reject)
 					})
-					.catch(reject)
+					.catch(reject)*/
 				}
 			}
 	 	})
  	})
-}
-
-/** 
- * Backup is to insert answers into our mongoDB warehouse
- */
-function warehouseAnswers(qAnswers) {
-	return new Promise((resolve, reject) => {
-		SDCQueryableAnswer.collection.insertMany(qAnswers, (err, docs) => {
-			if(err) {
-				reject(err)
-			} else {
-				resolve()
-			}
-		});
-	})
 }
 
 export default {
@@ -431,4 +417,3 @@ export default {
 	getClient: () => {return client},
 	hasClient
 }
-

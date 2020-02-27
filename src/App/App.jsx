@@ -6,15 +6,16 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { History } from 'Helpers';
 import { AlertActions } from 'Actions';
 import { PrivateRoute } from 'Components';
-/*import { HomePage } from 'Views/HomePage';
-import { LoginPage } from 'Views/LoginPage';
+/*import { LoginPage } from 'Views/LoginPage';
 import { RegisterPage } from 'Views/RegisterPage';
 import { UploadFormPage } from 'Views/UploadFormPage';
 import { FormTestPage } from 'Views/FormTestPage';
 import { FormQueryPage } from 'Views/FormQueryPage';
 import { FormSelectorPage } from 'Views/FormSelectorPage';*/
+import { HomePage } from 'Views/HomePage';
 import { TestPage } from 'Views/TestPage';
 import { QueryPage } from 'Views/QueryPage';
+import { AssessmentPage } from 'Views/AssessmentPage';
 
 const theme = createMuiTheme({});
 theme.palette.primary.main = "#326295"
@@ -25,7 +26,8 @@ theme.palette.secondary.main = "#342e53"
 theme.palette.secondary.dark = "#282440"
 theme.palette.secondary.light = "#443d6e"
 
-import './App.css';
+import './App.css'
+import './App.scss'
 
 class App extends React.Component {
     constructor(props) {
@@ -53,8 +55,10 @@ class App extends React.Component {
                         <Route path="/upload" component={UploadFormPage} />
                         <Route path="/query" component={FormQueryPage} />
                         <Route path="/" component={LoginPage} />*/}                        
+                        <Route path="/123" component={HomePage} />
                         <Route path="/test" component={TestPage} />
-                        <Route path="/" component={QueryPage} />                        
+                        <Route path="/query" component={QueryPage} />                        
+                        <Route path="/" component={AssessmentPage} />                        
                     </Switch>
                 </div>
             </MuiThemeProvider>

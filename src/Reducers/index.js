@@ -7,6 +7,7 @@ import { users } from './UserReducer';
 import { alert } from './AlertReducer';
 import { form } from './FormReducer';
 import { query } from './QueryReducer';
+import { assessment } from './AssessmentReducer';
 
 const rootReducer = (history) => combineReducers({
   router : connectRouter(history),
@@ -15,7 +16,8 @@ const rootReducer = (history) => combineReducers({
   users,
   alert,
   form,
-  query
+  query,
+  assessment
 });
 
 export default rootReducer;
