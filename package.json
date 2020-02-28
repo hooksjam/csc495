@@ -74,7 +74,6 @@
         "mongoose": "^5.7.12",
         "morgan": "^1.9.1",
         "node-fetch": "^2.3.0",
-        "node-sass": "^4.13.1",
         "optimize-css-assets-webpack-plugin": "^5.0.1",
         "passport": "^0.4.0",
         "passport-jwt": "^4.0.0",
@@ -111,6 +110,7 @@
         "chai-http": "^4.3.0",
         "mini-css-extract-plugin": "^0.5.0",
         "mocha": "^6.2.1",
+        "node-sass": "^4.13.1",
         "nodemon": "^1.19.2",
         "webpack-dev-middleware": "^3.6.1"
     }

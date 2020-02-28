@@ -15,7 +15,7 @@ import { FormSelectorPage } from 'Views/FormSelectorPage';*/
 import { HomePage } from 'Views/HomePage';
 import { TestPage } from 'Views/TestPage';
 import { QueryPage } from 'Views/QueryPage';
-import { AssessmentPage } from 'Views/AssessmentPage';
+import { StudyPage } from 'Views/StudyPage';
 
 const theme = createMuiTheme({});
 theme.palette.primary.main = "#326295"
@@ -35,7 +35,7 @@ class App extends React.Component {
 
         History.listen((location, action) => {
             // clear alert on location change
-            this.props.clearAlerts();
+            // this.props.clearAlerts();
         });
     }
 
@@ -55,10 +55,10 @@ class App extends React.Component {
                         <Route path="/upload" component={UploadFormPage} />
                         <Route path="/query" component={FormQueryPage} />
                         <Route path="/" component={LoginPage} />*/}                        
-                        <Route path="/123" component={HomePage} />
                         <Route path="/test" component={TestPage} />
                         <Route path="/query" component={QueryPage} />                        
-                        <Route path="/" component={AssessmentPage} />                        
+                        <Route path="/study" component={StudyPage} />                        
+                        <Route path="/" component={HomePage} />
                     </Switch>
                 </div>
             </MuiThemeProvider>

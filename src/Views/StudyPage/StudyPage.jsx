@@ -6,7 +6,7 @@ import {
     ESQueryDialog
  } from 'Components/Query';
 
-import './AssessmentPage.css'
+import './StudyPage.css'
 
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, ReferenceLine,
   ReferenceDot, Tooltip, CartesianGrid, Legend, Brush, ErrorBar, AreaChart, Area,
@@ -37,8 +37,7 @@ import {
 
 var screenChangeThreshold = 800;
 
-
-class AssessmentPage extends React.Component {
+class StudyPage extends React.Component {
     constructor(props){
         super(props);
         this.state = {
@@ -53,8 +52,8 @@ class AssessmentPage extends React.Component {
     }
 
     async componentDidMount() {
-        await this.props.getFormList();
-        await this.props.getForm("PKG_LDCT_LUNG");
+        // await this.props.getFormList();
+        // await this.props.getForm("PKG_LDCT_LUNG");
 
         window.addEventListener("resize", this.resize.bind(this));
     }
@@ -64,7 +63,6 @@ class AssessmentPage extends React.Component {
     }
 
     handleMouseEnter(e, satisfy) {
-        console.log("SATTTT", satisfy)
         var pos = [e.pageX, e.pageY]
         this.setState({hover:true, hoverPos:pos, showNodules:satisfy})
     }
@@ -77,7 +75,6 @@ class AssessmentPage extends React.Component {
         var pos = [e.pageX, e.pageY]
         this.setState({hoverPos:pos})
     }
-
 
     render() {
 
@@ -487,7 +484,7 @@ class AssessmentPage extends React.Component {
             <Grid className="assessmentWrapper">
 
                 <h1> Lung-RADS<sup>&copy;</sup> Version 1.1</h1>
-                <h3> Assessment Categories Release Date: 2019 </h3>
+                <h3> Study Categories Release Date: 2019 </h3>
                 <table>
                     <thead style={{backgroundColor:"#323e4f", color:"white"}}>
                         <tr>
@@ -655,5 +652,5 @@ const actionCreators = {
     sendESQuery: QueryActions.sendESQuery,
 }
 
-const connectedAssessmentPage = connect(mapState, actionCreators)(AssessmentPage);
-export { connectedAssessmentPage as AssessmentPage };
+const connectedStudyPage = connect(mapState, actionCreators)(StudyPage);
+export { connectedStudyPage as StudyPage };

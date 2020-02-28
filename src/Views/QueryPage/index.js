@@ -1,1 +1,1 @@
-export * from './QueryPage.jsx';
+export * from './QueryPage';

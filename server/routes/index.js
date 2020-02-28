@@ -4,6 +4,7 @@ import form from './form';
 import response from './response'
 import dummy from './dummy'
 import query from './query'
+import study from './study'
 
 export default (passport) => {
 	var router = express.Router();
@@ -16,5 +17,6 @@ export default (passport) => {
 		response(passport));
 	router.use('/dummy', dummy(passport));
 	router.use('/query', query(passport));
+	router.use('/study', study(passport));
 	return router;
 }
