@@ -1,9 +1,9 @@
-import { QueryConstants } from 'Constants';
-import { QueryServices } from 'Services';
+import { QueryConstants } from 'Constants'
+import { QueryServices } from 'Services'
 
 function sendQuery(query) {
     return async dispatch => {
-        dispatch(request());
+        dispatch(request())
 
         await QueryServices.sendFormQuery(query)
             .then(
@@ -20,7 +20,7 @@ function sendQuery(query) {
 
 function sendESQuery(query) {
     return async dispatch => {
-        dispatch(request());
+        dispatch(request())
 
         await QueryServices.sendESQuery(query)
             .then(

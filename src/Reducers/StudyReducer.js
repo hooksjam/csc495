@@ -1,15 +1,14 @@
-import { StudyConstants } from 'Constants';
+import { StudyConstants } from 'Constants'
 
-export function study(state = {}, action) {
+export function study(state = {patients:[]}, action) {
     switch (action.type) {
         case StudyConstants.GET_PATIENTS_SUCCESS:
             console.log("PATIENTS", action.patients)
             return {
-            	...state,
-            	patients:action.patients,
+                ...state,
+                patients:action.patients,
             }
-            break
         default:
-            return state;
+            return state
     }
 }

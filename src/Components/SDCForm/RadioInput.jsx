@@ -1,49 +1,51 @@
-import React from "react";
+import React from "react"
 
 import {
-    Question
-} from "Components/Form/Question";
-
-import {
-    Radio,
-    RadioGroup,
-    FormControl,
-    FormLabel,
-    FormControlLabel,
-    Typography,
-    List,
-    Collapse,
-    TextField
-} from '@material-ui/core';
+    Section,
+    Question,
+    TextInput,
+    Node,
+} from "Components"
 
 var timeout = null;
 
 export class RadioInput extends React.Component {
 
     constructor(props){
-        super(props);
+        super(props)
 
         this.state = {
-            selectedChoice: undefined
+            selectedChoice: undefined,
+            showOnSelection: true,
         }
+
+        this.onChange = this.onChange.bind(this)
+        this.getChoices = this.getChoices.bind(this)
+        this.getSubNodes = this.getSubNodes.bind(this)
     }
 
-    componentWillReceiveProps(nextProps, nextContext) {
-        if (nextProps.response !== undefined && nextProps.response.answers !== undefined){
-            let answer = nextProps.response.answers.filter(answer => answer.nodeID === this.props.node.referenceID)[0];
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if (nextProps.response && nextProps.response.answers) {
+            let answer = nextProps.response.answers.filter(answer => answer.nodeID === nextProps.node.referenceID)[0];
             if (answer !== undefined && answer.choices && answer.choices.length > 0){
                 let choice = answer.choices[0];
-                this.setState({
+                return {
                     selectedChoice: choice.choiceID
-                });
+                }
             }
         }
+        return null
     }
 
     onChange(e) {
-        if (e.target.getAttribute("index") === undefined || e.target.getAttribute("index") == null) {
+        if(this.state.selectedChoice == e.target.id)
+            this.setState({selectedChoice:null})
+        else
+            this.setState({selectedChoice:e.target.id})
+        return null
+        /*if (e.target.getAttribute("index") === undefined || e.target.getAttribute("index") == null) {
             console.log(e.target)
-            alert("Something wrong");
+            alert("Something wrong")
             return;
         }
         let index = e.target.getAttribute("index")
@@ -54,7 +56,7 @@ export class RadioInput extends React.Component {
             let answerVal = e.target.value
             let field = this.props.node.choices[index].field
             if (field.valueType === "decimal"){
-                answerType = "numberValue";
+                answerType = "numberValue"
             } 
 
             if(timeout)
@@ -75,33 +77,76 @@ export class RadioInput extends React.Component {
             ], 1)
         }
 
-        e.stopPropagation();
+        e.stopPropagation();*/
     }
 
-    getSubQuestions(choiceID) {
-        if (this.props.node.dependencies) {
-            return this.props.node.dependencies
-                .filter(dep => choiceID.startsWith(dep.choiceID))
-                .map(dep => this.props.getChildrenFn(dep.nodeID))
-                .map(child => {
-                    return (
-                        <Question
-                            key={child.referenceID}
-                            node={child}
-                            addAnswer={this.props.addAnswer}
-                            getChildrenFn={this.props.getChildrenFn}
-                            response={this.props.response}
-                        />
-                    );
-                })
+    getSubNodes(choiceID) {
+        if (!this.props.node.dependencies || this.props.node.dependencies.length == 0)
+            return null
+
+        // Don't show when not selected?
+
+        if(this.state.showOnSelection && choiceID != this.state.selectedChoice)
+            return null
+
+        var filtered = this.props.node.dependencies
+            .filter(dep => choiceID.startsWith(dep.choiceID))
+            .map(dep => this.props.getChildrenFn(dep.nodeID))
+
+        if(filtered.length == 0)
+            return null
+
+        return (<div className="nested">
+            {filtered.map((child, ix) => {
+                return <Node
+                    key={child.referenceID}
+                    id={child.referenceID}
+                    node={child}
+                    addAnswer={this.props.addAnswer}
+                    getChildrenFn={this.props.getChildrenFn}
+                    response={this.props.response}
+                    depth={this.props.depth}
+                    />
+                })}
+        </div>)
+    }
+
+    getField(choice) {
+        if(choice.field) {
+            return <TextInput referenceID={this.props.node.referenceID} choiceID={choice.referenceID} field={choice.field} addAnswer={this.props.addAnswer} response={this.props.response}/>
+        } else {
+            return null
         }
 
-        return [];
+    }
+
+    getChoices() {
+        return this.props.node.choices.map((x, ix) => {
+            return <div className="radioOption">
+                <div className="optionContent">
+                    <input 
+                        type="radio" 
+                        id={x.referenceID} 
+                        name={this.props.node.referenceID} 
+                        value={x.referenceID}
+                        checked={x.referenceID == this.state.selectedChoice} 
+                        onClick={this.onChange}></input>
+                    <label for={x.referenceID}> {x.title} </label>
+                    {this.getField(x)}
+                    {this.props.showID && <div className="identifier"><span>{x.referenceID}</span></div>}
+                </div>
+                {this.getSubNodes(x.referenceID)}
+            </div>
+        })
     }
 
     render() {
-        let selectedChoice = this.state.selectedChoice
         return (
+            <div className="radioInput">
+            {this.getChoices()}
+            </div>
+        )
+        /*return (
             <FormControl onChange={this.onChange.bind(this)}>
                 <FormLabel />
                 <RadioGroup>
@@ -162,6 +207,6 @@ export class RadioInput extends React.Component {
                     })}
                 </RadioGroup>
             </FormControl>
-        );
+        );*/
     }
 }

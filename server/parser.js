@@ -19,6 +19,7 @@ var parserOptions = {
     trimValues: true,
     cdataTagName: "__cdata", //default is 'false'
     cdataPositionChar: "\\c",
+    arrayMode:false,
     localeRange: "", //To support non english character in tag/attribute values.
     parseTrueNumberOnly: false,
     attrValueProcessor: a => he.decode(a, {isAttributeValue: true}),//default is a=>a
@@ -113,10 +114,10 @@ function parseList(obj) {
 		var newChoice = {title:"", referenceID:""}
 		if("attr" in item) {
 			newChoice.title = item["attr"]["title"]
-			// newChoice.referenceID = item["attr"]["ID"]
+			newChoice.referenceID = item["attr"]["ID"]
 			// if("name" in item["attr"])
 			// 	newChoice.referenceID = newChoice.referenceID + '.' + obj["attr"]["name"]
-			newChoice.referenceID = generateReferenceID()
+			// newChoice.referenceID = generateReferenceID()
 			item["attr"]["REF"] = newChoice.referenceID
 
 			if("selected" in item["attr"]) {
@@ -169,6 +170,7 @@ function addNodeDependency(node, dependentID, choiceID) {
 function parseQuestionStructure(form, _obj, _node, _section, _name) {
 	var questionStack = []
 	var currentQuestion = form.nodes.length;
+	console.log("Question", _name)
 
 	var lastListItem = ""
 	var traverse = (obj, node, section, name) => {
@@ -215,6 +217,9 @@ function parseQuestionStructure(form, _obj, _node, _section, _name) {
 				addNodeDependency(node, dependent.referenceID, lastListItem)
 			}
 			return
+		} else if(name == "Section") {
+			// console.log("SUB section!!")
+			// console.log(obj)
 		}
 
 		if(typeof obj === 'object' && obj != null) {
@@ -242,11 +247,11 @@ function addQuestion(form, obj, section) {
 
 	if(hasKeys(obj, ["attr"])) {
 		node.title = obj["attr"]["title"]
-		// node.referenceID = obj["attr"]["ID"]
+		node.referenceID = obj["attr"]["ID"]
 		// if("name" in obj["attr"])
 		// 	node.referenceID = node.referenceID + '.' + obj["attr"]["name"]
 		
-		node.referenceID = generateReferenceID()
+		// node.referenceID = generateReferenceID()
 	}
 
 	if(hasKeys(obj, ["Property", "attr"])) {
@@ -254,6 +259,7 @@ function addQuestion(form, obj, section) {
 		if(node.title == "" || node.title == null)
 			node.title = obj["Property"]["attr"]["val"]
 	}
+	// console.log("NEW QUESTION, structure", JSON.stringify(obj, null, 2))
 
 	form.nodes.push(node)
 	parseQuestionStructure(form, obj, form.nodes[form.nodes.length-1], section, "root")
@@ -292,12 +298,15 @@ function transformXMLToForm(xmlData) {
 		// Check for new section, do this one level deeper 
 		if(name == "Section") {
 			// TODO: possible to have only one section? (in which case it may not be array)
-			for(let i = 0; i < obj.length; i++) {
+			/*for(let i = 0; i < obj.length; i++) {
 				var title = ""
 				if(hasKeys(obj[i], ["attr", "title"]))
 					title = obj[i]["attr"]["title"]
+
+				if(title == "FINDINGS")
+					console.log("Findings", JSON.stringify(obj[i], null, 2))
 				form.sections.push(title)
-			}
+			}*/
 		}
 		/*if(traversalStack.length > 0 && traversalStack[traversalStack.length-1] == "Section") {
 			var title = ""
@@ -319,6 +328,16 @@ function transformXMLToForm(xmlData) {
 		// Get form details
 		else if(name == "FormDesign") {
 			form.title = obj["attr"]["formTitle"]
+		} else if(name == "Property") {
+			if(form.properties.length == 0 && Array.isArray(obj)) {
+				form.properties = obj.filter(x => {
+					var attr = x["attr"]
+					return (("type" in attr && attr["type"].includes("meta")) || ("propClass" in attr && attr["propClass"].includes("meta"))) && attr["val"] != null
+				}).map(x => {
+					var attr = x["attr"]
+					return {name:attr["propName"], value:attr["val"].toString()}
+				})
+			}
 		}
 
 

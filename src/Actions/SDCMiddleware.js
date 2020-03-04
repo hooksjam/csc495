@@ -130,7 +130,7 @@ function startResponse(diagnosticProcedureID, formFillerID = 0, patientID = 0) {
 }
 
 function getResponses(options = {diagnosticProcedureID:null, formFillerID:null, patientID:null}) {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		var path = '/api/response/search?'
 		if(options.diagnosticProcedureID != null)
 			path += 'diagnosticProcedureID='+options.diagnosticProcedureID

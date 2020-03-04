@@ -1,0 +1,55 @@
+
+table {
+	border:1px solid black;
+
+}
+
+thead {
+
+}
+
+tr {
+}
+
+td, th {
+	padding:5px;
+	text-align:center;
+}
+
+td {
+	border:1px solid black;
+}
+
+th {
+	border:1px solid black;
+
+}
+
+.findings {
+	padding:0;
+
+	tr:hover {
+		background-color:#eeeeee;
+	}
+
+	tr td {
+		border: 0px;
+		text-align:left;
+	}
+
+	tr:not(:last-child) td {
+		border-bottom:1px solid black;
+	}
+}
+
+.hover {
+	background-color:white;
+	border: 1px solid black;
+	border-radius:5px;
+	position:absolute;
+	margin-left:75px;
+
+	pre {
+		width:100%;
+	}
+}

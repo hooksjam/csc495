@@ -1,13 +1,11 @@
-import { push } from 'connected-react-router'
-
-import { AlertActions } from 'Actions';
-import { StudyConstants } from 'Constants';
-import { StudyServices } from 'Services';
-import { History } from 'Helpers';
+// import { AlertActions } from 'Actions'
+// import { History } from 'Helpers'
+import { StudyConstants } from 'Constants'
+import { StudyServices } from 'Services'
 
 function getPatients(username) {
     return dispatch => {
-        dispatch(request({ username }));
+        dispatch(request({ username }))
         StudyServices.getPatients(username)
             .then(
                 patients => {

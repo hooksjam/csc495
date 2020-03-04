@@ -3,7 +3,7 @@
 // routes/User
 import express from 'express'
 import util from '../util.js'
-import parser from '../parser.js'
+import parser from '../parserV2.js'
 import fs from 'fs'
 import path from 'path'
 import SDCForm from '../models/SDCForm'

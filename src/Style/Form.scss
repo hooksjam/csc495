@@ -1,0 +1,272 @@
+$form-bg-primary:#eeeeed;//#ADD8E6;
+$form-bg-secondary:#326295;//#000080;
+$form-nav-width:200px;
+
+.SDCForm {
+	display:flex;
+	flex-direction: row;
+	position:relative;
+	height:100%;
+}
+
+.formNav {
+	width:$form-nav-width;
+	height:100%;
+	position:absolute;
+	left:0;
+	top:0;
+	display:flex;
+	flex-direction:column;
+
+	.navItem {
+	 	margin:0 $item-spacing $item-spacing $item-spacing;
+	 	padding:5px;
+	 	min-height:0px;
+	}
+}
+
+.formContent {
+	margin-left:$form-nav-width;
+	padding-right:5px;
+	height:100%;
+	width:calc(100% - #{$form-nav-width});
+	overflow-y:scroll;
+}
+
+.footer {
+	margin:30px;
+	display:flex;
+	flex-direction: row;
+	justify-content: space-between;
+	.submit {
+		margin:0 auto;
+		max-width:350px;
+
+
+	}
+}
+
+.summary {
+	padding:4px;
+    display:flex;
+    flex-direction: column;
+    background-color:$form-bg-primary;
+    margin-bottom:10px;
+}
+
+.sections {
+	display:flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+.sectionTitle {
+	color:#fff;
+	background-color: $form-bg-secondary;
+	padding:2px;
+	cursor:pointer;
+	position:relative;
+
+	display:flex;
+	flex-direction: row;
+	padding:0 40px;
+
+	text-align:center;
+	margin-bottom:10px;
+
+	transition: background-color ease-in-out 0.1s;
+
+	h2, h3 {
+		margin:0 auto;
+		font-weight:600;
+	}
+
+	.arrow {
+		position:absolute;
+		top:0;
+		left:0;
+		height:100%;
+		width:15px;
+		margin:auto 5px;
+		font-size:20px;
+		text-align:center;
+		line-height:30px;
+	}
+}
+
+
+.section {
+	transition: background-color ease-in-out 0.1s;
+}
+
+.multisection {
+	border:1px solid $primary-main;
+	margin-bottom:10px;
+
+	.sectionTitle {
+		margin-bottom:0;//5px
+
+	}
+}
+
+.subnodes {
+	display:flex;
+	flex-direction: column;
+	flex-wrap:wrap;
+	margin-left:$nesting-left;
+	margin-right:$nesting-right;
+}
+
+.question {
+	padding:0px;
+	margin-bottom:10px;
+	display:flex;
+	flex-direction:column;
+	position:relative;
+}
+
+.questionTitle {
+	background-color: $form-bg-primary;
+	color:black;
+	padding:2px;
+	cursor:pointer;
+
+	height:24px;
+	display:flex;
+	flex-direction:row;
+	position:relative;
+
+	span {
+		font-style:italic;
+		font-size:13px;
+		// line-height:20px;
+		font-weight:600;
+		margin:auto 0 0 3px;
+	}
+
+	.arrow {
+		// height:100%;
+		width:10px;
+		margin:auto 3px;
+		font-size:15px;
+		text-align:center;
+	}
+}
+
+.textInput {
+	max-width:250px;
+	width:100%;
+}
+
+.checkboxInput, .radioInput {
+	display:flex;
+	flex-direction:column;
+	width:100%;
+	padding:2px;
+
+	.checkboxOption, .radioOption {
+		padding:2px;
+		display:flex;
+		flex-direction:column;
+	}
+	input {
+		// margin-top:-1px;
+		margin:auto 0;
+		vertical-align:middle;
+	}
+	label {
+		// line-height:30px;
+		font-weight:100;
+		margin:0 0 0 5px;
+		// line-height:26px;
+	}
+
+	.optionContent {
+		display:flex;
+		flex-direction:row;
+		align-items:center;
+	}
+	.optionContent .textInput {
+		margin-left:5px;
+	}
+}
+
+
+.item {
+	padding-bottom: 10px;
+}
+
+.nested {
+	margin-top:10px;
+	margin-left:25px;
+	width:calc(100% - 25px);
+	display:flex;
+	flex-direction:column;
+}
+
+.identifier {
+	position:absolute;
+	right:0;
+	margin-right:10px;
+	display:flex;
+	height:100%;
+
+	span {
+		margin:auto 0;
+	}
+}
+.multiNav {
+	display:flex;
+}
+
+.submit {
+	border: 3px solid $primary-main;
+}
+
+.tracker {
+	opacity:0;
+	transition: opacity ease-in-out 0.3s;
+}
+
+.trackerItems {
+	border-radius:3px;
+	margin:0 $item-spacing;
+	overflow: hidden;
+}
+
+.trackerItem {
+	background-color:$nav-color-item;
+	color: $nav-color-item-text;
+	cursor:pointer;
+	border-bottom:1px solid $nav-color-item;
+	text-align:left;
+
+	padding:$item-spacing;
+
+	transition: background-color ease-in-out 0.3s;
+
+	&:hover {
+		background-color:$nav-color-item-hover;
+	}
+	&.selected {
+		background-color:$nav-color-item-hover;
+
+
+	}
+	&.collapsed {
+		background-color:$nav-color-item;
+		color:$text-disabled;
+		cursor:default;
+	}
+
+	&.nested-1 {
+		padding-left:15px;
+	}
+
+	&.nested-2 {
+		padding-left:30px;
+	}
+}
+
+.glow .sectionTitle {
+	background-color:#ff0000
+}

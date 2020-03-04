@@ -61,7 +61,7 @@ export default (passport) => {
 		}
 
 		if (req.query.patientID != null) {
-			query.patientID = req.query.patientID;
+			query.patientID = req.query.patientID
 		}
 
 		if (req.query.diagnosticProcedureID != null) {

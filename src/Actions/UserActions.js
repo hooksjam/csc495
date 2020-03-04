@@ -1,24 +1,24 @@
 import { push } from 'connected-react-router'
 
-import { AlertActions } from 'Actions';
-import { UserConstants } from 'Constants';
-import { UserServices } from 'Services';
-import { History } from 'Helpers';
+import { AlertActions } from 'Actions'
+import { UserConstants } from 'Constants'
+import { UserServices } from 'Services'
+import { History } from 'Helpers'
 
 function login(username, password) {
     return dispatch => {
-        dispatch(request({ username }));
+        dispatch(request({ username }))
 
         UserServices.login(username, password)
             .then(
                 user => { 
-                    dispatch(success(user));
-                    History.push('/formSelctor');
-                    dispatch(push('/formSelector'));
+                    dispatch(success(user))
+                    History.push('/formSelctor')
+                    dispatch(push('/formSelector'))
                 },
                 error => {
-                    dispatch(failure(error.toString()));
-                    dispatch(AlertActions.error(error.toString()));
+                    dispatch(failure(error.toString()))
+                    dispatch(AlertActions.error(error.toString()))
                 }
             );
     };
@@ -29,25 +29,25 @@ function login(username, password) {
 }
 
 function logout() {
-    UserServices.logout();
-    return { type: UserConstants.LOGOUT };
+    UserServices.logout()
+    return { type: UserConstants.LOGOUT }
 }
 
 function register(user) {
     return dispatch => {
-        dispatch(request(user));
+        dispatch(request(user))
 
         UserServices.register(user)
             .then(
-                user => {                    
-                    dispatch(success());                     
-                    dispatch(AlertActions.success('Registration successful'));
-                    History.push('/login');
-                    dispatch(push('/login'));                    
+                (/*user*/) => {                    
+                    dispatch(success())
+                    dispatch(AlertActions.success('Registration successful'))
+                    History.push('/login')
+                    dispatch(push('/login'))
                 },
                 error => {
-                    dispatch(failure(error.toString()));
-                    dispatch(AlertActions.error(error.toString()));
+                    dispatch(failure(error.toString()))
+                    dispatch(AlertActions.error(error.toString()))
                 }
             );
     };
@@ -57,30 +57,14 @@ function register(user) {
     function failure(error) { return { type: UserConstants.REGISTER_FAILURE, error } }
 }
 
-// function getAll() {
-//     return dispatch => {
-//         dispatch(request());
-
-//         UserServices.getAll()
-//             .then(
-//                 users => dispatch(success(users)),
-//                 error => dispatch(failure(error.toString()))
-//             );
-//     };
-
-//     function request() { return { type: UserConstants.GETALL_REQUEST } }
-//     function success(users) { return { type: UserConstants.GETALL_SUCCESS, users } }
-//     function failure(error) { return { type: UserConstants.GETALL_FAILURE, error } }
-// }
-
 // prefixed function name with underscore because delete is a reserved word in javascript
 function _delete(id) {
     return dispatch => {
-        dispatch(request(id));
+        dispatch(request(id))
 
         UserServices.delete(id)
             .then(
-                user => dispatch(success(id)),
+                (/*user*/) => dispatch(success(id)),
                 error => dispatch(failure(id, error.toString()))
             );
     };
@@ -94,6 +78,5 @@ export const UserActions = {
     login,
     logout,
     register,
-    // getAll,
     delete: _delete
 };

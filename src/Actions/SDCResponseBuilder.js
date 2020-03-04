@@ -1,5 +1,3 @@
-import { SDCMiddleware } from 'Actions'
-
 function fetchOptions() {
 	return {
 		mode: 'cors', // no-cors, *cors, same-origin

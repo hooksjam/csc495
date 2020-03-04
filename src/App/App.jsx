@@ -27,7 +27,7 @@ theme.palette.secondary.dark = "#282440"
 theme.palette.secondary.light = "#443d6e"
 
 import './App.css'
-import './App.scss'
+import '../Style/App.scss'
 
 class App extends React.Component {
     constructor(props) {
@@ -43,7 +43,7 @@ class App extends React.Component {
         const { alert } = this.props;
         return (
             <MuiThemeProvider theme={theme}>
-                <div style={{height: '100%'}}>
+                <div style={{height: '100%', overflow:'hidden'}}>
                     {alert.message &&
                     <div className={`alert ${alert.type}`}>{alert.message}</div>
                     }

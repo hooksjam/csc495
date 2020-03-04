@@ -1,5 +1,5 @@
-import { FormConstants } from 'Constants';
-import { FormServices } from 'Services';
+import { FormConstants } from 'Constants'
+import { FormServices } from 'Services'
 
 function getFormList() {
     return async dispatch => {
@@ -18,6 +18,63 @@ function getFormList() {
     function failure(error) { return { type: FormConstants.GET_FORM_LIST_FAILURE, error } }
 }
 
+function getForm(diagnosticProcedureID) {
+    return async (dispatch, getState) => {
+        dispatch(request(diagnosticProcedureID));
+
+        if(diagnosticProcedureID in getState().form.cache)
+            dispatch(success(getState().form.cache[diagnosticProcedureID]))
+        else  {
+            await FormServices.getForm(diagnosticProcedureID)
+                .then(
+                    loadedForm => dispatch(success(loadedForm)),
+                    error => dispatch(failure(error.toString()))
+                )
+        }
+    }
+
+    function request(diagnosticProcedureID) {
+        return { type: FormConstants.GET_FORM_REQUEST, diagnosticProcedureID }
+    }
+    function success(loadedForm) { return { type: FormConstants.GET_FORM_SUCCESS, loadedForm } }
+    function failure(error) { return { type: FormConstants.GET_FORM_FAILURE, error } }
+}
+
+function addAnswer(response, node, answer) {
+    return async (dispatch, getState) => {
+        dispatch(request(node.referenceID));
+            await FormServices.addAnswer(response.referenceID, node.referenceID, answer)
+                .then(
+                    answer => dispatch(success(answer)),
+                    error => dispatch(failure(error.toString()))
+                )
+        }
+    }
+
+    function request(referenceID) {return { type: FormConstants.ADD_ANSWER_REQUEST, referenceID }
+    function success(answer) { return { type: FormConstants.ADD_ANSWER_SUCCESS, answer } }
+    function failure(error) { return { type: FormConstants.ADD_ANSWER_FAILURE, error } }
+}
+
+
+function getResponseList(formFillerID, patient) {
+    return async dispatch => {
+        dispatch(request(formFillerID));
+
+        await FormServices.getResponseList(formFillerID, patient)
+            .then(
+                responses => dispatch(success(responses)),
+                error => dispatch(failure(error.toString()))
+            )
+    }
+
+    function request(formFillerID){ return { type: FormConstants.GET_RESPONSE_REQUEST, diagnosticProcedureID }}
+    function success(responses) { return { type: FormConstants.GET_RESPONSE_SUCCESS, responses } }
+    function failure(error) { return { type: FormConstants.GET_RESPONSE_FAILURE, error } }
+}
+
+// Below I'm hoping to remove
+
 function getRecentlyAccessedList(formFillerID) {
     return async dispatch => {
         dispatch(request(formFillerID));
@@ -35,25 +92,6 @@ function getRecentlyAccessedList(formFillerID) {
     }
     function success(formResponses) { return { type: FormConstants.GET_FORM_RESPONSE_LIST_SUCCESS, formResponses } }
     function failure(error) { return { type: FormConstants.GET_FORM_RESPONSE_LIST_FAILURE, error } }
-}
-
-function getForm(diagnosticProcedureID) {
-    return async dispatch => {
-        dispatch(request(diagnosticProcedureID));
-
-        await FormServices.getForm(diagnosticProcedureID)
-            .then(
-                loadedForm => dispatch(success(loadedForm)),
-                error => dispatch(failure(error.toString()))
-            );
-
-    };
-
-    function request(diagnosticProcedureID) {
-        return { type: FormConstants.GET_FORM_REQUEST, diagnosticProcedureID }
-    }
-    function success(loadedForm) { return { type: FormConstants.GET_FORM_SUCCESS, loadedForm } }
-    function failure(error) { return { type: FormConstants.GET_FORM_FAILURE, error } }
 }
 
 function getResponseByFormResponse(formResponseID) {
@@ -125,7 +163,7 @@ function getAnswer(responseID) {
         );
     };
 
-    function request(responseID){
+    function request(){
         return {
             type: FormConstants.GET_RESPONSE_ANSWER_REQUEST,
         };
@@ -134,7 +172,7 @@ function getAnswer(responseID) {
     function failure(error) { return { type: FormConstants.GET_RESPONSE_ANSWER_FAILURE, error }; }
 }
 
-function addChoiceAnswer(responseID, nodeID, choiceID, yesNo, maxSelection){
+function addChoiceAnswer(){//responseID, nodeID, choiceID, yesNo, maxSelection){
     return async dispatch => {
         dispatch(request());        
     }
@@ -145,8 +183,8 @@ function addChoiceAnswer(responseID, nodeID, choiceID, yesNo, maxSelection){
         }
     }
 
-    function success() { return { type: FormConstants.ADD_FORM_RESPONSE_CHOICE_ANSWER_SUCCESS } }
-    function failure(error) { return { type: FormConstants.ADD_FORM_RESPONSE_CHOICE_ANSWER_FAILURE, error } }
+    /*function success() { return { type: FormConstants.ADD_FORM_RESPONSE_CHOICE_ANSWER_SUCCESS } }
+    function failure(error) { return { type: FormConstants.ADD_FORM_RESPONSE_CHOICE_ANSWER_FAILURE, error } }*/
 }
 
 function addFieldAnswer(response, nodeID, answerType, answerVal, choices=null, maxSelection = null){
@@ -226,7 +264,7 @@ function addFieldAnswer(response, nodeID, answerType, answerVal, choices=null, m
     function failure(error) { return { type: FormConstants.ADD_FORM_RESPONSE_FIELD_ANSWER_FAILURE, error } }
 }
 
-function deleteAnswer(responseID, nodeID, choiceID){
+/*function deleteAnswer(responseID, nodeID, choiceID){
     return async dispatch => {
         dispatch(request());
 
@@ -239,9 +277,9 @@ function deleteAnswer(responseID, nodeID, choiceID){
         }
     }
 
-    function success(){ return; }
-    function failure(error){ return;}
-}
+    // function success(){ return; }
+    // function failure(error){ return;}
+}*/
 
 function getFormQuery(query) {
     return async dispatch => {
@@ -300,6 +338,11 @@ function submitResponse(response) {
 export const FormActions = {
     getFormList,
     getForm,
+    addAnswer,
+    getResponseList,
+
+
+
     getResponse,
     getResponseByFormResponse,
     getAnswer,

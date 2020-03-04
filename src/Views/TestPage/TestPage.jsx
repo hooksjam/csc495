@@ -53,7 +53,9 @@ class TestPage extends React.Component {
 			json: "",
 			xml: "",
 			iterator:null
-		};
+		}
+
+		this.toStudy = this.toStudy.bind(this)
     }
 
 	componentDidMount(prevProps) {
@@ -81,6 +83,10 @@ class TestPage extends React.Component {
 			console.log(data)
 			this.setState({iterator:data.iterator, form:data.form, json:data.json, xml:data.xml})
 		})
+	}
+
+	toStudy() {
+        this.props.history.push({pathname:`/study/`, state: {}})
 	}
 
 	render(){
@@ -117,20 +123,21 @@ class TestPage extends React.Component {
 		}
 
 		return (
-		<div class="formViewer">
+		<div className="formViewer">
+			<div className="back" onClick={this.toStudy}>
+				<span> View Study </span>
+			</div>
 			<header className="testHeader">
-			<p>
-				SDC Form Preview
-			</p>
-			<select defaultValue="default" onChange={this.selectForm.bind(this)}>
-			<option value="default" hidden disabled>Select a form</option>
-				{formOptions}
-			</select>
+				<h2> SDC Form Inspector </h2>
+				<select defaultValue="default" onChange={this.selectForm.bind(this)}>
+				<option value="default" hidden disabled>Select a form</option>
+					{formOptions}
+				</select>
 			</header>
-			<div class="previewWindow">
-				<div>
+			<div className="previewWindow">
+				{/*<div>
 					<pre>{xmlString}</pre>
-				</div>
+				</div>*/}
 				<div>
 					<pre>{JSON.stringify(this.state.json, null, 2)}</pre>
 				</div>
