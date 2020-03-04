@@ -2,23 +2,46 @@ import { FormConstants } from 'Constants'
 
 export function form(state = {loading:false, cache:{}}, action) {
     switch (action.type) {
-        case FormConstants.GET_FORM_LIST_REQUEST:
-            return {
+
+        case FormConstants.GET_FORM_SUCCESS: {
+            var newState = {
                 ...state,
-                loading: true,                
+                loading: false,
             }
+            var dpID = action.loadedForm.metadata.diagnosticProcedureID
+            if(!(dpID in newState.cache)) {
+                newState.cache[dpID] = action.loadedForm
+            }
+            return newState
+        }
+
         case FormConstants.GET_FORM_LIST_SUCCESS:
             return {
                 ...state,
                 forms: action.forms,
+            }
+
+
+
+
+        // Other
+        case FormConstants.GET_FORM_RESPONSE_LIST_REQUEST:
+            return {
+                ...state,
+                loading: true,                
+            }
+        case FormConstants.GET_FORM_RESPONSE_LIST_SUCCESS:
+            return {
+                ...state,
+                responses: action.formResponses,
                 loading: false,                
             }
-        case FormConstants.GET_FORM_LIST_FAILURE:
+        case FormConstants.GET_FORM_RESPONSE_LIST_FAILURE:
             return { 
                 ...state,
                 loading: false,
                 error: action.error,                
-            }
+            } 
         case FormConstants.GET_FORM_QUERY_REQUEST:
             return {
                 ...state,
@@ -36,46 +59,6 @@ export function form(state = {loading:false, cache:{}}, action) {
                 loading: false,
                 error: action.error,                
             }
-        case FormConstants.GET_FORM_RESPONSE_LIST_REQUEST:
-            return {
-                ...state,
-                loading: true,                
-            }
-        case FormConstants.GET_FORM_RESPONSE_LIST_SUCCESS:
-            return {
-                ...state,
-                formResponses: action.formResponses,
-                loading: false,                
-            }
-        case FormConstants.GET_FORM_RESPONSE_LIST_FAILURE:
-            return { 
-                ...state,
-                loading: false,
-                error: action.error,                
-            }
-
-        case FormConstants.GET_FORM_REQUEST:
-            return {
-                ...state,
-                loading: true,                
-            }
-        case FormConstants.GET_FORM_SUCCESS: {
-            var newState = {
-                ...state,
-                loading: false,
-            }
-            var dpID = action.loadedForm.metadata.diagnosticProcedureID
-            if(!(dpID in newState.cache)) {
-                newState.cache[dpID] = action.loadedForm
-            }
-            return newState
-        }
-        case FormConstants.GET_FORM_FAILURE:
-            return {
-                ...state,
-                loading: false,                
-            }
-
         case FormConstants.GET_RESPONSE_REQUEST:
             return {
                 ...state,

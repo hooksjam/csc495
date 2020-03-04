@@ -56,23 +56,6 @@ function addAnswer(response, node, answer) {
     function failure(error) { return { type: FormConstants.ADD_ANSWER_FAILURE, error } }
 }
 
-
-function getResponseList(formFillerID, patient) {
-    return async dispatch => {
-        dispatch(request(formFillerID));
-
-        await FormServices.getResponseList(formFillerID, patient)
-            .then(
-                responses => dispatch(success(responses)),
-                error => dispatch(failure(error.toString()))
-            )
-    }
-
-    function request(formFillerID){ return { type: FormConstants.GET_RESPONSE_REQUEST, diagnosticProcedureID }}
-    function success(responses) { return { type: FormConstants.GET_RESPONSE_SUCCESS, responses } }
-    function failure(error) { return { type: FormConstants.GET_RESPONSE_FAILURE, error } }
-}
-
 // Below I'm hoping to remove
 
 function getRecentlyAccessedList(formFillerID) {
@@ -339,8 +322,6 @@ export const FormActions = {
     getFormList,
     getForm,
     addAnswer,
-    getResponseList,
-
 
 
     getResponse,

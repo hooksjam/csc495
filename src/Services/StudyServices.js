@@ -2,12 +2,12 @@
 
 //import {authHeader, Axios, getApiUrl} from 'Helpers';
 
-async function getPatients(username) {
-    const data = [{id:0, name:'John Doe'}, {id: 1, name:'Jane Doe'}]
+async function getPatientList(username) {
+    const patients = [{id:0, name:'John Doe'}, {id: 1, name:'Jane Doe'}]
     console.log('Getting patients for user ', username)
-    return data;
+    return patients
 }
 
 export const StudyServices = {
-    getPatients,
+    getPatientList,
 };

@@ -3,10 +3,10 @@
 import { StudyConstants } from 'Constants'
 import { StudyServices } from 'Services'
 
-function getPatients(username) {
+function getPatientList(username) {
     return dispatch => {
         dispatch(request({ username }))
-        StudyServices.getPatients(username)
+        StudyServices.getPatientList(username)
             .then(
                 patients => {
                     dispatch(success(patients))
@@ -16,11 +16,11 @@ function getPatients(username) {
                 })
     };
 
-    function request(patients) { return { type: StudyConstants.GET_PATIENTS_REQUEST, patients } }
-    function success(patients) { return { type: StudyConstants.GET_PATIENTS_SUCCESS, patients } }
-    function failure(error) { return { type: StudyConstants.GET_PATIENTS_ERROR, error } }
+    function request(patients) { return { type: StudyConstants.GET_PATIENT_LIST_REQUEST, patients } }
+    function success(patients) { return { type: StudyConstants.GET_PATIENT_LIST_SUCCESS, patients } }
+    function failure(error) { return { type: StudyConstants.GET_PATIENT_LIST_ERROR, error } }
 }
 
 export const StudyActions = {
-    getPatients,
+    getPatientList,
 };

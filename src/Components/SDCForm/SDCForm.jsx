@@ -29,7 +29,6 @@ class SDCForm extends React.Component {
     }
 
 	async componentDidMount() {
-        console.log("MOUNT!")
         divCache = {}
         if(this.props.diagnosticProcedureID != "")
             await this.props.getForm(this.props.diagnosticProcedureID)

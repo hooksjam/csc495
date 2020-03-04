@@ -1,5 +1,5 @@
 import React from 'react'
-import { FormActions, StudyActions } from 'Actions'
+import { ResponseActions, FormActions, StudyActions } from 'Actions'
 import { connect } from 'react-redux'
 import { 
     Result,
@@ -11,7 +11,7 @@ import {
 
 var screenChangeThreshold = 800
 
-var patients = [
+var patientss = [
     {
         id: 0,
         name: "John Smith",
@@ -108,21 +108,20 @@ class StudyPage extends React.Component {
         super(props)
         this.state = {
             smallScreen:false,
-            patientDropdown:false,
             currentPatient:0,
             currentMode:0,
-            scroll:0,
             collapseNav:true,
             showOptions:false,
         }
 
-        this.state.currentResult = patients.map(x => {
+        this.state.currentResult = this.props.study.patients.map(x => {
             return 0
         })
 
-        this.getPatient = this.getPatient.bind(this)
-        this.getResultList = this.getResultList.bind(this)
-        this.getPatientList = this.getPatientList.bind(this)
+        this.getResults = this.getResults.bind(this)
+        this.getPatients = this.getPatients.bind(this)
+        this.getStudyAid = this.getStudyAid.bind(this)
+        this.getForm = this.getForm.bind(this)
 
         this.nextPatient = this.nextPatient.bind(this)
         this.prevPatient = this.prevPatient.bind(this)
@@ -137,19 +136,10 @@ class StudyPage extends React.Component {
         this.viewForms = this.viewForms.bind(this)
     }
 
-    getPatient(id) {
-        for(let i = 0; i < this.props.study.patients.length; i++) {
-            if(id == this.props.study.patients[i].id)
-                return this.props.study.patients[i]
+    async componentDidMount() {
+        if(this.props.study.patients.length == 0) {
+            await this.props.getPatientList(this.props.user)
         }
-        return null
-    }
-
-    componentDidMount() {
-        // await this.props.getFormList();
-        // await this.props.getForm("PKG_LDCT_LUNG");
-        // await this.getResponseList(0, this.props.study.patients[this.currentPatient].id)
-
         // window.addEventListener("resize", this.resize.bind(this))
     }
 
@@ -157,29 +147,52 @@ class StudyPage extends React.Component {
         this.setState({smallScreen: window.innerWidth <= screenChangeThreshold})
     }
 
-    componentDidUpdate(prevProps, prevState) {
-        if(prevState.currentPatient != this.state.currentPatient) {
-            // await this.getResponseList(0, this.props.study.patients[this.currentPatient].id)
+    async componentDidUpdate(prevProps, prevState) {
+        if(prevState.currentPatient != this.state.currentPatient || prevState.currentResult.length != this.props.study.patients.length) {
+            await this.props.getResponseList(0, this.props.study.patients[this.currentPatient].id)
         }
     }
 
-    getResultList() {
-        // var id = this.props.study.patients[this.currentPatient].id
-        // var results = this.response.cache.filter(x => x.patientID = id)
-        return patients[this.state.currentPatient].results.map((x, ix) => {
-        // return results.map((x, ix) => {
-            return (<div 
-                key={`result_${ix}`}
-                className={`navItem ${ix == this.state.currentResult[this.state.currentPatient]?"selected":""}`}
-                onClick={() => {this.goToResult(ix)}}>
-                <span>{x.date}</span> 
-            </div>)
-        })
+    static getDerivedStateFromProps(nextProps, prevState) {
+        var newState = {}
+        if(nextProps.study.patients.length != prevState.currentResult.length) {
+            newState.currentResult = nextProps.study.patients.map(x => {return 0})
+        } 
+        newState.patients = []
+        for(let i = 0; i < nextProps.study.patients.length; i++) {
+            var patient = JSON.parse(JSON.stringify(nextProps.study.patients[i]))
+            patient.results = nextProps.response.cache[patient.id]
+        }
+        return newState
     }
 
-    getPatientList() {
-        return patients.map((x,ix) => {
-        // return this.props.study.patients.map((x,ix) => {
+    getResults() {
+        if(this.study.patients.length == 0)
+            return null
+
+        var id = this.props.study.patients[this.state.currentPatient].id
+        var results = this.props.response.cache[id]
+        if(results) {
+            // return patients[this.state.currentPatient].results.map((x, ix) => {
+            return results.map((x, ix) => {
+                return (<div 
+                    key={`result_${ix}`}
+                    className={`navItem ${ix == this.state.currentResult[this.state.currentPatient]?"selected":""}`}
+                    onClick={() => {this.goToResult(ix)}}>
+                    <span>{x.date}</span> 
+                </div>)
+            })
+        } else {
+            return null
+        }
+    }
+
+    getPatients() {
+        if(this.props.study.patients.length == 0)
+            return null
+
+        // return patients.map((x,ix) => {
+        return this.props.study.patients.map((x,ix) => {
             return (<div 
                 key={`patient_${x.id}`}
                 className={`navItem ${this.state.currentPatient == ix?"selected":""}`}
@@ -189,8 +202,37 @@ class StudyPage extends React.Component {
         })
     }
 
+    getStudyAid() {
+        if(this.props.study.patients.length == 0)
+            return null
+
+        var style = {}
+        if(this.currentMode != 1)
+            style.display = "hidden"
+        return <div style={style}>
+            <Lung_RADS patient={patients[this.state.currentPatient]}/>}
+        </div>
+    }
+
+    getForm() {
+        if(this.props.study.patients.length == 0)
+            return null
+
+        var style = {}
+        if(this.currentMode != 0)
+            style.display = "hidden"
+
+        // Get current patient and current result
+        var patient = this.props.study[this.state.currentPatient]
+        var result = this.props.response.cache[patient.id][this.state.currentResult]
+
+        return <div style={style}>
+            <SDCForm diagnosticProcedureID={result.diagnosticProcedureID} responseID={result.responseID}/>
+        </div>
+    }
+
     nextPatient() {
-        if(this.state.currentPatient == patients.length - 1) {
+        if(this.state.currentPatient == this.props.study.patients.length - 1) {
             // this.goToPatient(0)
         } else {
             this.goToPatient(this.state.currentPatient+1)
@@ -218,7 +260,7 @@ class StudyPage extends React.Component {
 
 
     nextResult() {
-        if(this.state.currentResult[this.state.currentPatient] == patients[this.state.currentPatient].results.length - 1) {
+        if(this.state.currentResult[this.state.currentPatient] == this.props.response.cache[this.props.study.patients[this.state.currentPatient].id].length - 1) {
             // this.goToResult(0)
         } else {
             this.goToResult(this.state.currentResult[this.state.currentPatient]+1)
@@ -269,14 +311,14 @@ class StudyPage extends React.Component {
                 <div className="navWrapper" style={navStyle}>
                     <div className="navBar noselect">
                         <div className="navGroup">
-                            <h4> Patient {this.state.currentPatient+1}/{patients.length}</h4>
+                            <h4> Patient {this.state.currentPatient+1}/{this.props.study.patients.length}</h4>
                         </div>
                         <div className="navGroup vertical">
-                            {this.getPatientList()}
+                            {this.getPatients()}
                         </div>
                         <div className="navGroup vertical">
                             <h4> Results </h4>
-                            {this.getResultList()}
+                            {this.getResults()}
                             <div className="navItem">
                                 <span>+ new result </span>
                             </div>
@@ -294,6 +336,7 @@ class StudyPage extends React.Component {
                 {this.state.showOptions && <Options clickOutside={this.toggleOptions} viewForms={this.viewForms}/>}
 
                 <div className="contentWrapper">
+                    {
                     <div className="toolbar noselect">
 
                         <div className="toolGroup">
@@ -301,7 +344,8 @@ class StudyPage extends React.Component {
                                 <div className={`arrow fas fa-angle-double-${this.state.collapseNav?"right":"left"}`}/>
                             </div>
                         </div>
-
+                        {this.props.study.patients.length> 0 && 
+                        <React.Fragment>
                         <div className="toolGroup">
                             <div className={`toolItem ${this.state.currentMode==0?"selected":""}`} onClick={()=>{this.selectMode(0)}}>
                                 <span>Report</span>
@@ -318,10 +362,10 @@ class StudyPage extends React.Component {
                                     </div>
 
                                     <div className="toolItem modeTitle disabled">
-                                        <span> {patients[this.state.currentPatient].name} </span>
+                                        <span> {this.props.study.patients[this.state.currentPatient].name} </span>
                                     </div>
 
-                                    <div className={`toolItem ${this.state.currentPatient == (patients.length-1)?"disabled":""}`} onClick={this.nextPatient}>
+                                    <div className={`toolItem ${this.state.currentPatient == (this.props.study.patients.length-1)?"disabled":""}`} onClick={this.nextPatient}>
                                         <div className="arrow fas fa-chevron-right"/>
                                     </div>
                                 </div>
@@ -332,24 +376,25 @@ class StudyPage extends React.Component {
                                     </div>
 
                                     <div className="toolItem modeTitle disabled">
-                                        <span> {patients[this.state.currentPatient].results[this.state.currentResult[this.state.currentPatient]].date} </span>
+                                        <span> {this.props.response.cache[this.props.patients[this.state.currentPatient].id][this.state.currentResult[this.state.currentPatient]].date} </span>
                                     </div>
 
-                                    <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == patients[this.state.currentPatient].results.length - 1?"disabled":""}`} onClick={this.nextResult}>
+                                    <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == this.props.results.cache[this.props.study.patients[this.state.currentPatient].id].length - 1?"disabled":""}`} onClick={this.nextResult}>
                                         <div className="arrow fas fa-chevron-right"/>
                                     </div> 
                                 </div>
                             </React.Fragment>
                         }
-                    </div>
+                        </React.Fragment>}
+                    </div>}
 
                     <div className="content">
-                        {this.state.currentMode == 1 &&  
-                            <Lung_RADS patient={patients[this.state.currentPatient]}/>}
-                        {this.state.currentMode == 0 && 
-                            <SDCForm diagnosticProcedureID={patients[this.state.currentPatient].diagnosticProcedureID} responseID=""/>
-                        }
+                        {this.getStudyAid()}
+                        {this.getForm()}
+                        {/*this.state.currentMode == 1 && getStudyAid()*/}
+                        {/*this.state.currentMode == 0 && getForm()*/}
                     </div>
+
 
                 </div>
             </div>
@@ -358,15 +403,16 @@ class StudyPage extends React.Component {
 }
 
 function mapState(state) {
-    const { form, authentication, study } = state
+    const { form, authentication, study, response } = state
     const { user } = authentication
 
-    return { user, form, study }
+    return { user, form, study, response }
 }
   
 const actionCreators = {
     getFormList: FormActions.getFormList,
-    getResponseList: FormActions.getResponseList,
+    getResponseList: ResponseActions.getResponseList,
+    getPatientList: StudyActions.getPatientList,
 }
 
 const connectedStudyPage = connect(mapState, actionCreators)(StudyPage)

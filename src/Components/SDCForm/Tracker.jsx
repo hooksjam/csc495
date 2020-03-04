@@ -83,7 +83,7 @@ export class Tracker extends React.Component {
 	getItems() {
         return this.state.sortedItems.map((x, ix) => {
         	var classes = `trackerItem ${ix in this.state.inView?"selected":""} ${x.ref.offsetParent == null?"collapsed":""} ${x.depth > 1?"nested-"+(x.depth-1):""}`
-    		return <div className={classes} onClick={(e) => {this.findItem(x)}}>
+    		return <div className={classes} key={ix} onClick={(e) => {this.findItem(x)}}>
     			{x.node.title}
     		</div>
     	})
