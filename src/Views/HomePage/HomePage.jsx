@@ -95,7 +95,7 @@ function mapState(state) {
 }
 
 const actionCreators = {
-    getPatients: StudyActions.getPatients,
+    getPatients: StudyActions.getPatientList,
     //deleteUser: UserActions.delete
 }
 

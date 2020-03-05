@@ -1,53 +1,5 @@
 import React from "react"
 
-export const patient = {
-    id: 1,
-    results: [
-        {
-            date: "2020-01-01",
-            nodules: [
-                {
-                    nodule_number:0,
-                    "solid": 30,
-                    "partsolid": 5,
-                },
-                {
-                    nodule_number:1,
-                    "GGN": 5,
-                } 
-            ]
-        },
-        {
-            date: "2019-01-01",
-            nodules: [
-                {
-                    nodule_number:0,
-                    "solid": 25,
-                    "partsolid": 3,
-                },
-                {
-                    nodule_number:1,
-                    "GGN": 4,
-                } ,
-            ]
-        },
-        {
-            date: "2018-01-01",
-            nodules: [
-                {
-                    nodule_number:0,
-                    "solid": 22,
-                    "partsolid": 2,
-                },
-                {
-                    nodule_number:1,
-                    "GGN": 3,
-                } 
-            ]
-        }  
-    ]
-}
-
 export const predicates = {
     "0": [
         {

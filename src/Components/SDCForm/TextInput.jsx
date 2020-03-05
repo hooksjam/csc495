@@ -11,13 +11,13 @@ export class TextInput extends React.Component {
             value: ''
         };
 
-        this.uploadLatency = undefined;
+        this.saveTimeout = undefined;
         this.onChange = this.onChange.bind(this)
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if (nextProps.response !== undefined && nextProps.response.answers !== undefined && prevState.value === ""){
-            let answer = nextProps.response.answers.filter(answer => answer.nodeID === nextPropsrops.referenceID)[0];
+            /*let answer = nextProps.response.answers.filter(answer => answer.nodeID === nextProps.node.referenceID)[0];
             let value = "";
             if (answer !== undefined) {
                 let key = "stringValue"
@@ -28,16 +28,28 @@ export class TextInput extends React.Component {
             }
             return {
                 value:value
-            }
+            }*/
         }
         return null
     }
 
     onChange(e) {
-        this.setState({value:e.target.value})
+        var value = e.target.value
+        this.setState({value:value})
+
+        if (this.saveTimeout != null){
+            clearTimeout(this.saveTimeout)
+        }
+        this.saveTimeout = setTimeout(function() {
+            this.saveTimeout = null
+            if (value === this.state.value){
+                console.log(this.props)
+                this.props.addAnswer(this.props.response, this.props.node, {stringValue:value})
+            }
+        }.bind(this), 500)
         return 
 
-        let error = false;
+        /*let error = false;
         let value = e.target.value;
         if (this.props.field && this.props.field.valueType && this.props.field.valueType === "decimal") {
             let pattern = /^\d+.?\d*$/g;
@@ -55,11 +67,11 @@ export class TextInput extends React.Component {
             return;
         }
 
-        if (this.uploadLatency !== undefined){
-            clearTimeout(this.uploadLatency);
+        if (this.saveTimeout !== undefined){
+            clearTimeout(this.saveTimeout);
         }
-        this.uploadLatency = setTimeout(function() {
-            this.uploadLatency = undefined;
+        this.saveTimeout = setTimeout(function() {
+            this.saveTimeout = undefined;
             if (value === this.state.value){
                 let answerType = "stringValue";
                 if (this.props.node.field.valueType === "decimal"){
@@ -68,7 +80,7 @@ export class TextInput extends React.Component {
                 this.props.addAnswer(this.props.response, this.props.node.referenceID,
                     answerType, value, null);
             }
-        }.bind(this), 500);
+        }.bind(this), 500);*/
     }
 
     render() {
@@ -83,9 +95,6 @@ export class TextInput extends React.Component {
             name={this.props.referenceID}
             error={this.state.error}
             value={this.state.value}
-            inputProps={{
-                style: {fontSize: 15}
-            }}
             onChange={this.onChange}>
         </input>
         )

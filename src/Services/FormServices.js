@@ -20,14 +20,12 @@ async function getForm(diagnosticProcedureID) {
     
     try {        
         response = await Axios.get(`/api/form/${diagnosticProcedureID}`)//?force=1&fullData=1`)
-        console.log("FORM RESPONSE!", response)
 
         let data = response.data
         let metadata = await getMetadata(data) 
         let properties = await getProperties(data)
         let nodes = await getNodes(data)
         let roots = await getRoots(nodes)
-        console.log("ROOOOOOTS", roots)
         let nodeMap = await constructNodeMap(nodes)
         let getChildrenFn = await getChildrenFunction(nodeMap)
         return {

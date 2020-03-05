@@ -25,6 +25,8 @@ export default (passport) => {
 
 		var timestamp = util.timestamp()
 		var newResponse = new SDCFormResponse()
+		var date = new Date()
+		newResponse.date = date.toLocaleDateString("en-US")//`${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`
 		newResponse.createdAt = timestamp
 		newResponse.updatedAt = timestamp
 		newResponse.diagnosticProcedureID = response.diagnosticProcedureID
@@ -99,6 +101,19 @@ export default (passport) => {
 	/**
 	 * Update/submit a form response
 	 */
+	router.put('/procedure', (req, res) => {
+		if (req.body._id == null) {
+			util.errorMessage(res, "no id supplied");
+			return
+		}
+		SDCFormResponse.updateOne({_id:req.body._id}, {diagnosticProcedureID:req.body.diagnosticProcedureID})
+		.then(() => {
+			res.send(200)
+		})
+		.catch(err => {
+			util.errorMessage(res, err, "updating diagnosticProcedureID")
+		})
+	})
 	router.put('/', (req, res) => {
 		// All the answers should already be in the form, at this point we just create a persistent link (if it doesn't exist)
 		if (req.body._id == null) {

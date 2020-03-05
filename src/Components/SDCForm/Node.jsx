@@ -45,12 +45,14 @@ export class Node extends React.Component {
                 />
             )
         } else if(this.props.node.nodeType == "Section") {
+            console.log("SECITON MaX INSTANCES",this.props.node.title, this.props.node.maxInstances)
         	if(this.props.sectionID == null && this.props.node.maxInstances && this.props.node.maxInstances > 0)
         	{
         		return (
         			<MultiSection
         				key={this.props.id}
         				node={this.props.node}
+                        addAnswer={this.props.addAnswer}
 	                    getChildrenFn={this.props.getChildrenFn}
 	                    response={this.props.response}
 	                    showID={this.state.showID}
@@ -64,6 +66,7 @@ export class Node extends React.Component {
 	                <Section
 	                    key={this.props.id}
 	                    node={this.props.node}
+                        addAnswer={this.props.addAnswer}
 	                    getChildrenFn={this.props.getChildrenFn}
 	                    response={this.props.response}
 	                    showID={this.state.showID}
@@ -78,6 +81,7 @@ export class Node extends React.Component {
                 <Item
                     key={this.props.id}
                     node={this.props.node}
+                    addAnswer={this.props.addAnswer}
                     showID={this.state.showID}
                     depth={this.props.depth}
                 />)

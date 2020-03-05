@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { FormActions } from 'Actions'
+import { ResponseActions, FormActions } from 'Actions'
 import { Node, Tracker } from 'Components'
 
 import ReactDOM from 'react-dom'
@@ -17,6 +17,7 @@ class SDCForm extends React.Component {
             showIDs:false,
             nodeCount: 0,
         }
+        this.getTitle = this.getTitle.bind(this)
         this.getProperties = this.getProperties.bind(this)
         this.getSections = this.getSections.bind(this)
         this.toggleSections = this.toggleSections.bind(this)
@@ -28,25 +29,31 @@ class SDCForm extends React.Component {
         this.registerNode = this.registerNode.bind(this)
     }
 
-	async componentDidMount() {
+	componentDidMount() {
         divCache = {}
-        if(this.props.diagnosticProcedureID != "")
-            await this.props.getForm(this.props.diagnosticProcedureID)
+        if(this.props.diagnosticProcedureID != "" && !(this.props.diagnosticProcedureID in this.props.cache))
+            this.props.getForm(this.props.diagnosticProcedureID)
 	}
 
-    async componentWillReceiveProps(nextProps, nextContext) {
+    componentWillReceiveProps(nextProps, nextContext) {
         if(nextProps.diagnosticProcedureID != this.props.diagnosticProcedureID) {
             divCache = {}
-            await this.props.getForm(nextProps.diagnosticProcedureID)
+            if(!(nextProps.diagnosticProcedureID in this.props.cache))
+                this.props.getForm(nextProps.diagnosticProcedureID)
         }
     }
 
+    getTitle() {
+        for(let i = 0; i < this.props.form.properties.length; i++) {
+            if(this.props.form.properties[i].name == "OfficialName")
+                return <h1> {this.props.form.properties[i].value} </h1>
+        }
+        return null
+    }
+
     getProperties() {
-        var propertyNames = new Set(["OfficialName", "Category", "Restrictions", "Required", "CTV_Dkey", "ChecklistCKey", "VersionID", "CurrentFileName", "ApprovalStatus", "Approval", "EffectiveDate"])
         if(this.props.form.properties) {
-            return this.props.form.properties.filter(x => {
-                return propertyNames.has(x.name) || true
-            }).map((x, ix) => {
+            return this.props.form.properties.map((x, ix) => {
                 return <span key={x.name}><strong>{x.name}</strong>: {x.value}</span>
             })
         } else
@@ -80,7 +87,7 @@ class SDCForm extends React.Component {
                     node={node}
                     getChildrenFn={this.props.form.getChildrenFn}
                     addAnswer={this.props.addAnswer}
-                    response={this.props.form.response}
+                    response={this.props.response}
                     helpers={helpers}
                     depth={0}
                 />
@@ -142,11 +149,12 @@ class SDCForm extends React.Component {
                         </div>
                     </div>
 
-                    <div className="navGroup">
+                    {/*<div className="navGroup">
                         <Tracker items={divCache} count={this.state.nodeCount} scrollTo={this.scrollTo}/>
-                    </div>
+                    </div>*/}
                 </div>
                 <div className="formContent" ref={(x) => {this.content = x}} onScroll={this.handleScroll}>
+                    {this.getTitle()}
                     <div className="summary" ref={(x) => {this.summary = x}}>
                         {this.getProperties()}
                     </div>
@@ -171,13 +179,14 @@ function mapState(state, ownProps) {
     var form = null
     if(ownProps.diagnosticProcedureID in state.form.cache)
         form = state.form.cache[ownProps.diagnosticProcedureID]
+    var cache = state.form.cache
 
-    return { form }
+    return { form, cache }
 }
   
 const actionCreators = {
     getForm: FormActions.getForm,
-    addAnswer: FormActions.addAnswer,
+    addAnswer: ResponseActions.addAnswer,
 }
 
 const connectedSDCFormPage = connect(mapState, actionCreators)(SDCForm)

@@ -5,13 +5,19 @@ import {
     Result,
     ESQueryDialog,
     Lung_RADS,
+    TI_RADS,
     SDCForm,
     Options,
  } from 'Components'
 
 var screenChangeThreshold = 800
 
-var patientss = [
+const aidMap = {
+   PKG_LDCT_LUNG: {name:'Lung-RADS', component:Lung_RADS},
+   PKG_THYROID_US: {name:'TI-RADS', component:TI_RADS},
+}
+
+var dummyPatients = [
     {
         id: 0,
         name: "John Smith",
@@ -112,12 +118,14 @@ class StudyPage extends React.Component {
             currentMode:0,
             collapseNav:true,
             showOptions:false,
+            patients:[],
         }
 
-        this.state.currentResult = this.props.study.patients.map(x => {
+        this.state.currentResult = this.state.patients.map(x => {
             return 0
         })
 
+        this.getCurrentResult = this.getCurrentResult.bind(this)
         this.getResults = this.getResults.bind(this)
         this.getPatients = this.getPatients.bind(this)
         this.getStudyAid = this.getStudyAid.bind(this)
@@ -126,7 +134,6 @@ class StudyPage extends React.Component {
         this.nextPatient = this.nextPatient.bind(this)
         this.prevPatient = this.prevPatient.bind(this)
         this.goToPatient = this.goToPatient.bind(this)
-        this.toggleDropdown = this.toggleDropdown.bind(this)
         this.selectMode = this.selectMode.bind(this)
         this.goToResult = this.goToResult.bind(this)
         this.nextResult = this.nextResult.bind(this)
@@ -134,10 +141,13 @@ class StudyPage extends React.Component {
         this.toggleNav = this.toggleNav.bind(this)
         this.toggleOptions = this.toggleOptions.bind(this)
         this.viewForms = this.viewForms.bind(this)
+        this.addResult = this.addResult.bind(this)
+        this.setProcedure = this.setProcedure.bind(this)
     }
 
     async componentDidMount() {
-        if(this.props.study.patients.length == 0) {
+        this.props.getFormList()
+        if(this.state.patients.length == 0) {
             await this.props.getPatientList(this.props.user)
         }
         // window.addEventListener("resize", this.resize.bind(this))
@@ -148,8 +158,8 @@ class StudyPage extends React.Component {
     }
 
     async componentDidUpdate(prevProps, prevState) {
-        if(prevState.currentPatient != this.state.currentPatient || prevState.currentResult.length != this.props.study.patients.length) {
-            await this.props.getResponseList(0, this.props.study.patients[this.currentPatient].id)
+        if((prevState.currentPatient != this.state.currentPatient || prevState.currentResult.length != this.state.patients.length) && this.state.patients.length > 0) {
+            await this.props.getResponseList(0, this.state.patients[this.state.currentPatient].id)
         }
     }
 
@@ -161,20 +171,31 @@ class StudyPage extends React.Component {
         newState.patients = []
         for(let i = 0; i < nextProps.study.patients.length; i++) {
             var patient = JSON.parse(JSON.stringify(nextProps.study.patients[i]))
-            patient.results = nextProps.response.cache[patient.id]
+            if(patient.id in nextProps.response.results) {
+                patient.results = nextProps.response.results[patient.id].map(x => {return nextProps.response.cache[x]})
+            } else {
+                patient.results = []
+            }
+            newState.patients.push(patient)
         }
         return newState
     }
 
+    getCurrentResult() {
+        if(this.state.patients.length == 0 || this.state.patients[this.state.currentPatient].results.length == 0)
+            return null
+        return this.state.patients[this.state.currentPatient].results[this.state.currentResult[this.state.currentPatient]]
+    }
+
     getResults() {
-        if(this.study.patients.length == 0)
+        if(this.state.patients.length == 0)
             return null
 
-        var id = this.props.study.patients[this.state.currentPatient].id
-        var results = this.props.response.cache[id]
-        if(results) {
-            // return patients[this.state.currentPatient].results.map((x, ix) => {
-            return results.map((x, ix) => {
+        var results = this.state.patients[this.state.currentPatient].results
+        if(results && results.length > 0) {
+            return results.sort((a, b) => {
+                return b.createdAt.localeCompare(a.createdAt)
+            }).map((x, ix) => {
                 return (<div 
                     key={`result_${ix}`}
                     className={`navItem ${ix == this.state.currentResult[this.state.currentPatient]?"selected":""}`}
@@ -182,17 +203,15 @@ class StudyPage extends React.Component {
                     <span>{x.date}</span> 
                 </div>)
             })
-        } else {
-            return null
-        }
+        } 
     }
 
     getPatients() {
-        if(this.props.study.patients.length == 0)
+        if(this.state.patients.length == 0)
             return null
 
         // return patients.map((x,ix) => {
-        return this.props.study.patients.map((x,ix) => {
+        return this.state.patients.map((x,ix) => {
             return (<div 
                 key={`patient_${x.id}`}
                 className={`navItem ${this.state.currentPatient == ix?"selected":""}`}
@@ -203,36 +222,68 @@ class StudyPage extends React.Component {
     }
 
     getStudyAid() {
-        if(this.props.study.patients.length == 0)
+        if(this.state.patients.length == 0 || this.state.patients[this.state.currentPatient].results.length == 0)
             return null
 
-        var style = {}
-        if(this.currentMode != 1)
-            style.display = "hidden"
-        return <div style={style}>
-            <Lung_RADS patient={patients[this.state.currentPatient]}/>}
-        </div>
+        var result = this.getCurrentResult()
+        if(result) {
+            var style = {height:"100%"}
+            if(this.state.currentMode != 1)
+                style.display = "none"
+
+            if(result.diagnosticProcedureID && result.diagnosticProcedureID != "") {
+                const Aid = aidMap[result.diagnosticProcedureID].component
+                return <div style={style}>
+                    {/*<Lung_RADS patient={this.state.patients[this.state.currentPatient]}/>}*/}
+                    <Aid patient={dummyPatients[0]}/>
+                </div>
+            } else {
+                return null
+            }
+        } else {
+            return null
+        }
     }
 
     getForm() {
-        if(this.props.study.patients.length == 0)
+        if(this.state.patients.length == 0)
             return null
 
-        var style = {}
-        if(this.currentMode != 0)
-            style.display = "hidden"
-
         // Get current patient and current result
-        var patient = this.props.study[this.state.currentPatient]
-        var result = this.props.response.cache[patient.id][this.state.currentResult]
+        var result = this.getCurrentResult()
+        
 
-        return <div style={style}>
-            <SDCForm diagnosticProcedureID={result.diagnosticProcedureID} responseID={result.responseID}/>
-        </div>
+        if(result) {
+            var style = {height:"100%"}
+            if(this.state.currentMode != 0)
+                style.display = "hidden"
+
+            if(result.diagnosticProcedureID && result.diagnosticProcedureID != "") {
+                return <div style={style}>
+                    <SDCForm diagnosticProcedureID={result.diagnosticProcedureID} response={result}/>
+                </div>
+            } else if(this.props.form.forms.length > 0) {
+                return <div className="studyInfo">
+                    <h2> Select a procedure </h2>
+                    <div className="navGroup vertical">
+                        {this.props.form.forms.map((x, ix) => {
+                            return <div key={ix} className="navItem" onClick={() => this.setProcedure(x.diagnosticProcedureID)}>
+                                {x.title}
+                            </div>
+                        })}
+                    </div>
+                </div>
+            }
+        } else {
+            return null
+            /*return <div className="studyInfo">
+                <h2> Add a new result </h2>
+            </div>*/
+        }
     }
 
     nextPatient() {
-        if(this.state.currentPatient == this.props.study.patients.length - 1) {
+        if(this.state.currentPatient == this.state.patients.length - 1) {
             // this.goToPatient(0)
         } else {
             this.goToPatient(this.state.currentPatient+1)
@@ -248,20 +299,11 @@ class StudyPage extends React.Component {
     }
 
     goToPatient(i) {
-        console.log("GO TO PATIENT ", i)
-        this.setState({currentPatient:i, patientDropdown:false})
+        this.setState({currentPatient:i, currentMode:0})
     }
-
-    toggleDropdown() {
-        console.log("Toggle dropdown")
-        this.setState({patientDropdown:!this.state.patientDropdown})
-
-    }
-
 
     nextResult() {
-        if(this.state.currentResult[this.state.currentPatient] == this.props.response.cache[this.props.study.patients[this.state.currentPatient].id].length - 1) {
-            // this.goToResult(0)
+        if(this.state.currentResult[this.state.currentPatient] == this.state.patients[this.state.currentPatient].results.length - 1) {
         } else {
             this.goToResult(this.state.currentResult[this.state.currentPatient]+1)
         }
@@ -280,6 +322,18 @@ class StudyPage extends React.Component {
         newState.currentResult[this.state.currentPatient] = i
         newState.mode = 0
         this.setState(newState)
+    }
+
+    addResult() {
+        console.log(this.state.patients)
+        this.props.addResponse(0, this.state.patients[this.state.currentPatient].id)
+        this.setState({currentResult:0})
+    }
+
+    setProcedure(x) {
+        var result = this.getCurrentResult()
+        if(result)
+            this.props.setProcedure(result._id, x)
     }
 
     toggleNav() {
@@ -306,22 +360,24 @@ class StudyPage extends React.Component {
             navStyle.flexBasis = "0px"
         }
 
+        var result = this.getCurrentResult()
+
         return (
             <div className="studyWrapper">
                 <div className="navWrapper" style={navStyle}>
                     <div className="navBar noselect">
                         <div className="navGroup">
-                            <h4> Patient {this.state.currentPatient+1}/{this.props.study.patients.length}</h4>
+                            <h4> Patient {this.state.patients.length > 0 && `${this.state.currentPatient+1}/${this.state.patients.length}`}</h4>
                         </div>
                         <div className="navGroup vertical">
                             {this.getPatients()}
                         </div>
                         <div className="navGroup vertical">
                             <h4> Results </h4>
-                            {this.getResults()}
-                            <div className="navItem">
-                                <span>+ new result </span>
+                            <div className="navItem" onClick={this.addResult}>
+                                <div className="fas fa-plus"/>
                             </div>
+                            {this.getResults()}
                         </div>
 
                         <div className="navGroup vertical" style={{marginTop:"auto"}}>
@@ -344,47 +400,56 @@ class StudyPage extends React.Component {
                                 <div className={`arrow fas fa-angle-double-${this.state.collapseNav?"right":"left"}`}/>
                             </div>
                         </div>
-                        {this.props.study.patients.length> 0 && 
+                        {this.state.patients.length > 0 && 
                         <React.Fragment>
-                        <div className="toolGroup">
-                            <div className={`toolItem ${this.state.currentMode==0?"selected":""}`} onClick={()=>{this.selectMode(0)}}>
-                                <span>Report</span>
-                            </div>
-                            <div className={`toolItem ${this.state.currentMode==1?"selected":""}`} onClick={()=>{this.selectMode(1)}}>
-                                <span>Lung-RADS</span>
-                            </div>
-                        </div>
-                        {this.state.collapseNav && 
-                            <React.Fragment>
-                                <div className="toolGroup">
-                                    <div className={`toolItem ${this.state.currentPatient == 0?"disabled":""}`} onClick={this.prevPatient}>
-                                        <div className="arrow fas fa-chevron-left"/>
-                                    </div>
-
-                                    <div className="toolItem modeTitle disabled">
-                                        <span> {this.props.study.patients[this.state.currentPatient].name} </span>
-                                    </div>
-
-                                    <div className={`toolItem ${this.state.currentPatient == (this.props.study.patients.length-1)?"disabled":""}`} onClick={this.nextPatient}>
-                                        <div className="arrow fas fa-chevron-right"/>
-                                    </div>
+                            {result != null && result.diagnosticProcedureID && result.diagnosticProcedureID != "" &&
+                            <div className="toolGroup">
+                                <div className={`toolItem ${this.state.currentMode==0?"selected":""}`} onClick={()=>{this.selectMode(0)}}>
+                                    <span>Report</span>
                                 </div>
-
-                                <div className="toolGroup">
-                                    <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == 0?"disabled":""}`} onClick={this.prevResult}>
-                                        <div className="arrow fas fa-chevron-left"/>
-                                    </div>
-
-                                    <div className="toolItem modeTitle disabled">
-                                        <span> {this.props.response.cache[this.props.patients[this.state.currentPatient].id][this.state.currentResult[this.state.currentPatient]].date} </span>
-                                    </div>
-
-                                    <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == this.props.results.cache[this.props.study.patients[this.state.currentPatient].id].length - 1?"disabled":""}`} onClick={this.nextResult}>
-                                        <div className="arrow fas fa-chevron-right"/>
-                                    </div> 
+                                <div className={`toolItem ${this.state.currentMode==1?"selected":""}`} onClick={()=>{this.selectMode(1)}}>
+                                    <span>{aidMap[result.diagnosticProcedureID].name}</span>
                                 </div>
-                            </React.Fragment>
-                        }
+                            </div>}
+                            {this.state.collapseNav && 
+                                <React.Fragment>
+                                    <div className="toolGroup">
+                                        <div className={`toolItem ${this.state.currentPatient == 0?"disabled":""}`} onClick={this.prevPatient}>
+                                            <div className="arrow fas fa-chevron-left"/>
+                                        </div>
+
+                                        <div className="toolItem modeTitle disabled">
+                                            <span> {this.state.patients[this.state.currentPatient].name} </span>
+                                        </div>
+
+                                        <div className={`toolItem ${this.state.currentPatient == (this.state.patients.length-1)?"disabled":""}`} onClick={this.nextPatient}>
+                                            <div className="arrow fas fa-chevron-right"/>
+                                        </div>
+                                    </div>
+
+                                    {this.state.patients[this.state.currentPatient].results.length > 0 && 
+                                    <div className="toolGroup">
+                                        <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == 0?"disabled":""}`} onClick={this.prevResult}>
+                                            <div className="arrow fas fa-chevron-left"/>
+                                        </div>
+
+                                        <div className="toolItem modeTitle disabled">
+                                            <span> {this.state.patients[this.state.currentPatient].results[this.state.currentResult[this.state.currentPatient]].date} </span>
+                                        </div>
+
+                                        <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == this.state.patients[this.state.currentPatient].results.length - 1?"disabled":""}`} onClick={this.nextResult}>
+                                            <div className="arrow fas fa-chevron-right"/>
+                                        </div> 
+
+                                    </div>}
+
+                                    <div className="toolGroup">
+                                        <div className="toolItem" onClick={this.addResult}>
+                                            <div className="fas fa-plus"/>
+                                        </div>  
+                                    </div>
+                                </React.Fragment>
+                            }
                         </React.Fragment>}
                     </div>}
 
@@ -411,7 +476,9 @@ function mapState(state) {
   
 const actionCreators = {
     getFormList: FormActions.getFormList,
+    addResponse: ResponseActions.addResponse,
     getResponseList: ResponseActions.getResponseList,
+    setProcedure: ResponseActions.setProcedure,
     getPatientList: StudyActions.getPatientList,
 }
 

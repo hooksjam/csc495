@@ -43,7 +43,7 @@
 	flex-basis:$nav-width;
 	flex-grow:0;
 	flex-shrink:0;
-	transition: flex-basis ease-in-out 0.2s;
+	// transition: flex-basis ease-in-out 0.2s;
 }
 
 .navBar {
@@ -105,6 +105,7 @@
 
 	.fas {
 		width:100%;
+		margin:auto;
 	}
 }
 
@@ -243,12 +244,21 @@
 
 // Tables/graphs
 .studyAid {
-	padding:0 50px;
+	padding:0 50px 50px 50px;
 	margin:0;
 	overflow-y:scroll;
 	height:100%;
+	display:flex;
+	flex-direction: column;
+	//zoom:75%;
 }
 
 .studyAidContent {
+
+}
+
+.studyInfo {
+	margin: 50px auto auto auto;
+	padding:0 50px;
 
 }

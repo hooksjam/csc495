@@ -40,7 +40,6 @@ export class CheckboxInput extends React.Component {
     }
 
     onChange(e) {
-        console.log("TARGET", e.target, e.target.checked)
         var newState = {...this.state}
         var target = e.target
         if(target.checked)
@@ -136,7 +135,7 @@ export class CheckboxInput extends React.Component {
                         value={x.referenceID} 
                         checked={x.referenceID in this.state.checked} 
                         onClick={this.onChange}></input>
-                    <label for={x.referenceID}> {x.title} </label>
+                    <div className="optionLabel"> {x.title} </div>
                     {this.getField(x)}
                     {this.props.showID && <div className="identifier"><span>{x.referenceID}</span></div>}
                 </div>

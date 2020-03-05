@@ -122,16 +122,16 @@ export class RadioInput extends React.Component {
 
     getChoices() {
         return this.props.node.choices.map((x, ix) => {
-            return <div className="radioOption">
+            return <div className="radioOption" key={ix}>
                 <div className="optionContent">
                     <input 
                         type="radio" 
                         id={x.referenceID} 
                         name={this.props.node.referenceID} 
                         value={x.referenceID}
-                        checked={x.referenceID == this.state.selectedChoice} 
+                        defaultChecked={x.referenceID == this.state.selectedChoice} 
                         onClick={this.onChange}></input>
-                    <label for={x.referenceID}> {x.title} </label>
+                    <div className="optionLabel"> {x.title} </div>
                     {this.getField(x)}
                     {this.props.showID && <div className="identifier"><span>{x.referenceID}</span></div>}
                 </div>

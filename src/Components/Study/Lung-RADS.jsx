@@ -14,11 +14,38 @@ export class Lung_RADS extends React.Component {
             hover:false,
             hoverPos:[0,0],
             showNodules:[],
+            results:[]
         }
         this.handleMouseEnter = this.handleMouseEnter.bind(this)
         this.handleMouseLeave = this.handleMouseLeave.bind(this)
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.getNoduleSize = this.getNoduleSize.bind(this)
+
+        // Process results with config into nodules
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        return null
+        var newState = {}
+        var results = []
+        for(let i = 0; i < nextProps.patient.results.length; i++) {
+            var result = nextProps.patient.results[i]
+            var obj = {
+                date:result.date,
+                responseID: result.responseID,
+                nodules:{}
+            }
+
+            // Go through answers and map to nodules
+            // Put answers in map
+            var fields = []
+            var answerMap = {}
+            for(let i = 0; i < result.answers.length; i++) {
+
+            }
+
+            results.push(obj)
+        }
     }
 
     handleMouseEnter(e, satisfy) {
@@ -240,10 +267,11 @@ export class Lung_RADS extends React.Component {
             }) 
             var colors = ["red", "blue", "green"]
             var lines = lineKeys.map((x, ix) => { 
-                return <Line type="monotone" dataKey={x} stroke={colors[ix]} yAxisId={0} /> 
+                return <Line key={ix} type="monotone" dataKey={x} stroke={colors[ix]} yAxisId={0} /> 
             })
 
             return (<LineChart
+                key={nodule_num}
                 width={600}
                 height={400}
                 data={data}
@@ -263,7 +291,7 @@ export class Lung_RADS extends React.Component {
         } 
 
         return (
-            <div className="studyAid">
+            <div className="studyAid Lung-RADS">
                 <h1> Lung-RADS<sup>&copy;</sup> Version 1.1</h1>
                 <h3> Study Categories Release Date: 2019 </h3>
                 <table>
@@ -271,7 +299,7 @@ export class Lung_RADS extends React.Component {
                         <tr>
                             <th> Category Descriptor </th>
                             <th> Lung-RADS Score </th>
-                            <th> Findings </th>
+                            <th style={{width:"25%"}}> Findings </th>
                             <th> Management </th>
                             <th> Risk of Malignancy </th>
                             <th> Est. Population Prevelence </th>

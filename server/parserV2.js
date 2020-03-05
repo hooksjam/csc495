@@ -47,209 +47,6 @@ function printArray(arr) {
 }
 
 /**
- * Parse a json response field into an SDCFormField
- * @param obj JSON
- * return SDCFormField
- */
-// function parseResponseField(obj) {
-// 	var field = new SDCFormField()
-
-// 	if(hasKeys(obj, ["attr", "responseRequired"])) {
-// 		field.required = JSON.parse(obj["attr"]["responseRequired"])
-// 	}
-
-// 	var properties = obj["Response"]
-// 	if("string" in properties)
-// 		field.valueType = "string"
-// 	else if("decimal" in properties)
-// 		field.valueType = "decimal"
-// 	else if("yesno" in properties) // TODO: real value
-// 		field.valueType = "yesno"
-// 	else if("integer" in properties)
-// 		field.valueType = "integer"
-
-// 	// Check if there are limits
-// 	if(hasKeys(properties[field.valueType], ["attr", "maxInclusive"]))
-// 		field.maxInclusive = properties[field.valueType]["attr"]["maxInclusive"]
-// 	if(hasKeys(field[field.valueType], ["attr", "minInclusive"]))
-// 		field.minInclusive = properties[field.valueType]["attr"]["minInclusive"]
-// 	// These will have attr, name, and order attributes that I'm pretty sure we don't need
-
-// 	if("TextAfterResponse" in obj) {
-// 		field.textAfter= obj["TextAfterResponse"]["attr"]["val"]
-// 	}
-// 	if("ResponseUnits" in obj) {
-// 		field.units = obj["ResponseUnits"]["attr"]["val"]
-// 	}
-// 	return field;
-// }
-
-/**
- * Parse a json of list elements into a list of SDCFormChoice
- * @param obj JSON
- * @return [SDCFormChoice]
- */
-// function parseList(obj) {
-// 	var items = obj["List"]["ListItem"]
-
-// 	var choices = []
-// 	var addItem = (i, item) => {
-// 		var newChoice = {title:"", referenceID:""}
-// 		if("attr" in item) {
-// 			newChoice.title = item["attr"]["title"]
-// 			newChoice.referenceID = item["attr"]["ID"]
-// 			// if("name" in item["attr"])
-// 			// 	newChoice.referenceID = newChoice.referenceID + '.' + obj["attr"]["name"]
-// 			// newChoice.referenceID = generateReferenceID()
-// 			item["attr"]["REF"] = newChoice.referenceID
-
-// 			if("selected" in item["attr"]) {
-// 				newChoice.selected = JSON.parse(item["attr"]["selected"])
-// 			}
-// 			if("selectionDeselectsSiblings" in item["attr"]) {
-// 				newChoice.selectionDeselectsSiblings = JSON.parse(item["attr"]["selectionDeselectsSiblings"])
-// 			}
-// 		}
-
-// 		if("ListItemResponseField" in item) {
-// 			var field = parseResponseField(item["ListItemResponseField"])
-// 			newChoice.field = field
-// 		}
-// 		choices.push(newChoice)
-// 	}
-
-// 	// Items could be an object or array
-// 	if(Array.isArray(items)) {
-// 		for(let i = 0; i < items.length; i++) {
-// 			if(items[i] != null)
-// 				addItem(i, items[i])
-// 		} 
-// 	} else {
-// 		if(items != null)
-// 			addItem(0, items)
-// 	}
-
-// 	return choices
-// }
-
-/**
- * Add node dependency
- */
-// function addNodeDependency(node, dependentID, choiceID) {
-// 	if(!node.dependencies)
-// 		node.dependencies = [{nodeID:dependentID, choiceID:choiceID}]
-// 	else
-// 		node.dependencies.push({nodeID:dependentID, choiceID:choiceID})	
-// }
-
-/** 
- * Traverse the question json to parsing SDCNode choices and fields
- * @param form SDCForm
- * @param _obj JSON
- * @param _node SDCNode
- * @param _section String
- * @param _name  String
- */
-// function parseQuestionStructure(form, _obj, _node, _section, _name) {
-// 	var questionStack = []
-// 	var currentQuestion = form.nodes.length;
-// 	console.log("Question", _name)
-
-// 	var lastListItem = ""
-// 	var traverse = (obj, node, section, name) => {
-// 		var parent = ""
-// 		if(questionStack.length > 0)
-// 			parent = questionStack[questionStack.length-1]
-// 		questionStack.push(name)
-
-// 		// Parse various types of question properties
-// 		if(name == "ListField") {
-// 			var maxSelections = 1;
-// 			if("attr" in obj) {
-// 				var attr = obj["attr"]
-// 				if("maxSelections" in obj["attr"]) {
-// 					maxSelections = parseInt(obj["attr"]["maxSelections"])
-// 				}
-// 			}
-// 			node.maxSelections = maxSelections
-	
-// 			var list = parseList(obj)
-// 			if(list.length > 0)
-// 				node.choices = list
-// 			lastListItem = ""
-// 		} else if(name == "ResponseField") {
-// 			node.field = parseResponseField(obj)
-// 		// Store the most recent list item, if we encounter another child then we know this is the parent
-// 		} else if(parent == "ListItem") {
-// 			// Case where its likely part of array
-// 			if("attr" in obj) {
-// 				lastListItem = obj["attr"]["REF"]
-// 			} 
-// 			// Where its on its own, so name is attr
-// 			else if(name == "attr") {
-// 				lastListItem = obj["ID"]
-// 			}
-// 		} else if(name == "Question") {
-// 			if(Array.isArray(obj)) {
-// 				for(var i = 0; i < obj.length; i++) {
-// 					var dependent = addQuestion(form, obj[i], section)
-// 					addNodeDependency(node, dependent.referenceID, lastListItem)
-// 				}
-// 			} else {
-// 				var dependent = addQuestion(form, obj, section)
-// 				addNodeDependency(node, dependent.referenceID, lastListItem)
-// 			}
-// 			return
-// 		} else if(name == "Section") {
-// 			// console.log("SUB section!!")
-// 			// console.log(obj)
-// 		}
-
-// 		if(typeof obj === 'object' && obj != null) {
-// 			for(var key in obj) {
-// 				traverse(obj[key], node, section, key)
-// 			}
-// 		}
-// 		questionStack.pop()
-// 	}
-// 	traverse(_obj, _node, _section, _name)
-// }
-
-/** 
- * Add a question from a subtree of the main form
- * @param form SDCForm
- * @param obj JSON
- * @param section String
- * @param dependency, SDCFormNode
- * @param choiceID String, referenceID of a potenially dependent list item
- */
-// function addQuestion(form, obj, section) {
-// 	var node = new SDCFormNode()
-
-// 	node.section = parseInt(section);
-
-// 	if(hasKeys(obj, ["attr"])) {
-// 		node.title = obj["attr"]["title"]
-// 		node.referenceID = obj["attr"]["ID"]
-// 		// if("name" in obj["attr"])
-// 		// 	node.referenceID = node.referenceID + '.' + obj["attr"]["name"]
-		
-// 		// node.referenceID = generateReferenceID()
-// 	}
-
-// 	if(hasKeys(obj, ["Property", "attr"])) {
-// 		// Don't override (prefer attribute name)
-// 		if(node.title == "" || node.title == null)
-// 			node.title = obj["Property"]["attr"]["val"]
-// 	}
-// 	// console.log("NEW QUESTION, structure", JSON.stringify(obj, null, 2))
-
-// 	form.nodes.push(node)
-// 	parseQuestionStructure(form, obj, form.nodes[form.nodes.length-1], section, "root")
-// 	return node
-// }
-
-/**
  * Takes the raw xml of a form and  transforms it to an SDCForm
  * @param xmlData file
  * @return SDCForm
@@ -313,7 +110,7 @@ function transformXMLToForm(xmlData) {
 		} else if(name == "Section") {
 			var section = new SDCFormNode()
 			section.title = obj.attr.title
-			section.referenceID = obj.attr.ID
+			section.referenceID = `${obj.attr.name}_${obj.attr.ID}`
 			section.nodeType = "Section"
 			addDependency(section)
 
@@ -337,7 +134,8 @@ function transformXMLToForm(xmlData) {
 		} else if(name == "DisplayedItem") {
 			var item = new SDCFormNode()
 			item.title = obj.attr.title
-			item.referenceID = obj.attr.ID
+			item.referenceID = `${obj.attr.name}_${obj.attr.ID}`
+			//item.referenceID = obj.attr.ID
 			item.nodeType = "Item"
 			addDependency(item)
 			console.log("ITEM", item)
@@ -346,7 +144,8 @@ function transformXMLToForm(xmlData) {
 		} else if(name == "Question") {	
 			var question = new SDCFormNode()
 			question.title = obj.attr.title
-			question.referenceID = obj.attr.ID
+			question.referenceID = `${obj.attr.name}_${obj.attr.ID}`
+			//question.referenceID = obj.attr.ID
 			question.nodeType =  "Question"
 			addDependency(question)
 
@@ -431,7 +230,9 @@ function transformXMLToForm(xmlData) {
 			if(question) {
 				var choice = new SDCFormChoice()
 				choice.title = obj.attr.title
-				choice.referenceID = obj.attr.ID
+				choice.referenceID = `${obj.attr.name}_${obj.attr.ID}`
+				// choice.referenceID = obj.attr.ID
+
 				question.choices.push(choice)
 				choiceStack.push({ix: question.choices.length-1, referenceID:choice.referenceID})
 				drillDown()

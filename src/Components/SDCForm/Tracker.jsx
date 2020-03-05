@@ -3,15 +3,14 @@ import React from "react";
 import {
 } from 'Components'
 
-var getInView = (items, height) => {
+var getInView = (items, pageheight) => {
 	// Calculate which item is closest to "eyeline" position
 	var inView = {}
 	for(let i = 0; i < items.length; i++) {
 		var top = items[i].ref.getBoundingClientRect().top
+		var height = items[i].ref.getBoundingClientRect().height
 		var bottom = items[i].ref.getBoundingClientRect().bottom
-		if(i == 3) {
-		}
-		if(top > 0 && top < height)
+		if((top > 0 && top < pageheight) || (top < 0 && (top + height) > pageheight/2))
 			inView[i] = 1
 	}
 	return inView
@@ -56,8 +55,7 @@ export class Tracker extends React.Component {
 	}
 
     static getDerivedStateFromProps(nextProps, prevState) {
-    	console.log("RECALC")
-		if(Object.keys(nextProps.items).length != prevState.sortedItems.length) {
+		if(Object.keys(nextProps.items).length != prevState.sortedItems.length || prevState.sortedItems.length == 0) {
 	        var sortedItems = Object.keys(nextProps.items)
 	        .map(x => {return nextProps.items[x]})
 	        .filter(x => x.ref != null)
@@ -73,6 +71,7 @@ export class Tracker extends React.Component {
 	        })
 	        return {sortedItems:sortedItems, inView:getInView(sortedItems, prevState.height)}
 	    }
+	    return null
     }
 
     findItem(x) {

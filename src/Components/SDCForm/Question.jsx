@@ -78,7 +78,11 @@ export class Question extends React.Component {
                 return <CheckboxInput node={this.props.node} showID={this.props.showID} addAnswer={this.props.addAnswer} response={this.props.response} getChildrenFn={this.props.getChildrenFn}/>
             }
         } else {
-            return <TextInput referenceID={this.props.node.referenceID} field={this.props.node.field} addAnswer={this.props.addAnswer} response={this.props.response}/>
+            return <TextInput 
+                node={this.props.node} 
+                field={this.props.node.field} 
+                addAnswer={this.props.addAnswer} 
+                response={this.props.response}/>
         }
 
     }

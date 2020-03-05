@@ -1,6 +1,6 @@
 import { FormConstants } from 'Constants'
 
-export function form(state = {loading:false, cache:{}}, action) {
+export function form(state = {loading:false, forms:[], cache:{}}, action) {
     switch (action.type) {
 
         case FormConstants.GET_FORM_SUCCESS: {

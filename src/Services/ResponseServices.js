@@ -13,7 +13,20 @@ async function getResponseList(formFillerID, patient) {
     return responses.data
 }
 
+async function addResponse(formFillerID, patientID, diagnosticProcedureDI) {
+    let responses = {}
+    try {
+        responses = await Axios.post(`/api/response`, {formFillerID, patientID, diagnosticProcedureDI} )
+    } catch(e) {
+        console.log(e)
+        return {}
+    }
+    return responses.data
+}
+
 async function addAnswer(responseID, nodeID, answer) {
+    console.log("ADD ANSWER", answer)
+    return null
     let responses = {}
     try {
         responses = await Axios.post(`/api/response/answer`, {responseID, nodeID, answer} )
@@ -24,8 +37,21 @@ async function addAnswer(responseID, nodeID, answer) {
     return responses.data
 }
 
-export const FormServices = {
+async function setProcedure(responseID, diagnosticProcedureID) {
+    let responses = {}
+    try {
+        responses = await Axios.put(`/api/response/procedure`, {_id:responseID, diagnosticProcedureID} )
+    } catch(e) {
+        console.log(e)
+        throw e
+    }
+    return responses.data
+}
+
+
+export const ResponseServices = {
     addAnswer,
-    // addResponse,
+    addResponse,
     getResponseList,
+    setProcedure,
 }

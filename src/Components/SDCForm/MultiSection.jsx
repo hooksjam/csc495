@@ -144,7 +144,7 @@ export class MultiSection extends React.Component {
                 <Collapsible show={this.state.expanded}>
                     {this.getNav()}
                     {this.state.sectionCount > 0 && 
-                    <div class="subnodes">
+                    <div className="subnodes">
                         <Node
                             key={`${this.props.id}_${this.state.currentSection}`}
                             sectionID={this.state.currentSection}
