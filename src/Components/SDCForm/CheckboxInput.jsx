@@ -29,8 +29,7 @@ export class CheckboxInput extends React.Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
         if(nextProps.response != null && nextProps.node != null && (Object.keys(prevState.checked).length == 0 || nextProps.response._id != prevState.responseID)) {
-            var key = `${nextProps.node.referenceID}_${nextProps.instance}`
-            var answer = nextProps.response.map[key]
+            var answer = nextProps.response.getAnswerFn(nextProps.node.referenceID, nextProps.instance)
             if(answer && answer.choices.length > 0) {
                 var checked = {}
                 for(let i = 0; i < answer.choices.length; i++) {

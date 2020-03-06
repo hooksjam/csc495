@@ -1,5 +1,20 @@
 import { ResponseConstants } from 'Constants'
 
+var initResponse = (response) => {
+    if(response.answers.length == 0) {
+        response.map = {}
+    } else {
+        response.map = response.answers.reduce((map, obj) => {
+            map[`${obj.nodeID}_${obj.instance}`] = obj
+            return map
+        }, {})
+        response.answers = []
+    }
+    response.getAnswerFn = (nodeID, instance) => {
+        var key = `${nodeID}_${instance}`
+        return response.map[key]
+    }
+}
 export function response(state = {loading:false, results:{}, cache:{}}, action) {
     switch (action.type) {
         // case ResponseConstants.GET_LIST_REQUEST:
@@ -16,18 +31,11 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
                 delete newState.results[action.patientID]
             newState.results[action.patientID] = []
 
-            console.log("REPSONSES", action.responses)
             for(let i = 0; i < action.responses.length; i++) {
                 newState.results[action.patientID].push(action.responses[i]._id)
 
                 var response = action.responses[i]
-                console.log("ANSWRS", response.answers)
-                response.map = response.answers.reduce((map, obj) => {
-                    map[`${obj.nodeID}_${obj.instance}`] = obj
-                    return map
-                }, {})
-                console.log("MAP", response.map)
-                response.answers = []
+                initResponse(response)
                 newState.cache[response._id] = response
             }
             return newState
@@ -44,12 +52,7 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
             newState.results[action.response.patientID].push(action.response._id)
 
             var response = action.response
-            /*console.log("RESP", response)
-            response.map = response.answers.reduce((map, obj) => {
-                map[`${obj.nodeID}_${obj.instance}`] = obj
-                return map
-            }, {})*/
-            response.map = {}
+            initResponse(response)
             newState.cache[response._id] = response
             return newState
         }
@@ -59,12 +62,13 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
             return newState
         }
         case ResponseConstants.ADD_ANSWER_SUCCESS: {
-            var newState = {...state}
             // Update answer list and map
             var answer = action.answer
             var key = `${answer.nodeID}_${answer.instance}`
-            var response = newState.cache[answer.responseID]
+            var response = state.cache[answer.responseID]
             response.map[key] = answer
+            console.log("ANSWER SUCCESS")
+            return {...state}
         }
         default:
             return state

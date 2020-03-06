@@ -235,7 +235,7 @@ class StudyPage extends React.Component {
                 const Aid = aidMap[result.diagnosticProcedureID].component
                 return <div style={style}>
                     {/*<Lung_RADS patient={this.state.patients[this.state.currentPatient]}/>}*/}
-                    <Aid patient={dummyPatients[0]}/>
+                    <Aid patient={dummyPatients[0]} patientID={0}/>
                 </div>
             } else {
                 return null

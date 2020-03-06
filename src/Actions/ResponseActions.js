@@ -4,7 +4,6 @@ import { ResponseServices } from 'Services'
 function addAnswer(response, node, answer, instance=0) {
     answer.responseID = response._id
     answer.nodeID = node.referenceID
-    console.log("Add answer", response, node, answer)
     return async (dispatch, getState) => {
         dispatch(request(node.referenceID))
             await ResponseServices.addAnswer(answer)

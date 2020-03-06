@@ -25,8 +25,7 @@ export class TextInput extends React.Component {
     static getDerivedStateFromProps(nextProps, prevState) {
         if(nextProps.response != null && nextProps.node != null && (prevState.value == "" || nextProps.response._id != prevState.responseID)) {
         //if (nextProps.response !== undefined && nextProps.response.answers !== undefined && prevState.value === ""){
-            var key = `${nextProps.node.referenceID}_${nextProps.instance}`
-            var answer = nextProps.response.map[key]
+            var answer = nextProps.response.getAnswerFn(nextProps.node.referenceID, nextProps.instance)
             if(answer) {
                 if(nextProps.choiceID != null && nextProps.node.choices != null)
                 {

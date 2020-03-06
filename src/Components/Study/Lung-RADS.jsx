@@ -1,4 +1,5 @@
 import React from "react"
+import { connect } from 'react-redux'
 
 import { predicates } from './Lung-RADSConfig.jsx'
 
@@ -6,7 +7,19 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, ReferenceLine,
   ReferenceDot, Tooltip, CartesianGrid, Legend, Brush, ErrorBar, AreaChart, Area,
   Label, LabelList } from 'recharts'
 
-export class Lung_RADS extends React.Component {
+var sectionKey = '000032'
+var propMap = {
+    'nodule_number': '592375972',
+    'image_number': '000033',
+    'solid': '000048',
+    'partsolid': '000053',
+    'partsolid-solid': '000057',
+    'pgg': '000051',
+}
+
+
+
+class Lung_RADS extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
@@ -20,31 +33,54 @@ export class Lung_RADS extends React.Component {
         this.handleMouseLeave = this.handleMouseLeave.bind(this)
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.getNoduleSize = this.getNoduleSize.bind(this)
-
-        // Process results with config into nodules
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        return null
-        var newState = {}
-        var results = []
-        for(let i = 0; i < nextProps.patient.results.length; i++) {
-            var result = nextProps.patient.results[i]
-            var obj = {
-                date:result.date,
-                responseID: result.responseID,
-                nodules:{}
+        if(!nextProps.response || !nextProps.form)
+            return null
+        if(!(nextProps.patient.id in nextProps.response.results))
+            return null
+
+        var rawResults = nextProps.response.results[nextProps.patient.id]
+        .filter(x => {return x in nextProps.response.cache})
+        .map(x => {
+            return nextProps.response.cache[x]
+        }).filter(x => {
+            return x.diagnosticProcedureID = 'PKG_LDCT_LUNG'
+        })
+        // How many nodules?
+        var noduleSection = nextProps.form.getChildrenFn(sectionKey)
+        var results = rawResults.map(x => {
+            var result = {
+                date:x.date,
+                createdAt:x.createdAt,
+                responseID:x._id,
+                nodules:[],
             }
+            for(let j = 0; j < noduleSection.maxInstances; j++) {
+                var sectionInstance = x.getAnswerFn(noduleSection.referenceID, j)
+                if(!sectionInstance)
+                    continue
 
-            // Go through answers and map to nodules
-            // Put answers in map
-            var fields = []
-            var answerMap = {}
-            for(let i = 0; i < result.answers.length; i++) {
+                var getProp = (nodeID) => {
+                    return x.getAnswerFn(nodeID, j)
+                }
 
+                // Get answers for this module
+                var nodule = Object.keys(propMap).reduce((map, obj) => {
+                    var keys = propMap[obj]
+                    var answer = getProp(propMap[obj])
+                    if(answer)
+                        map[obj] = parseFloat(answer.field.stringValue)
+                    return map
+                },{})
+
+                result.nodules.push(nodule)
             }
-
-            results.push(obj)
+            return result
+        })
+        return {
+            results:results
         }
     }
 
@@ -86,17 +122,17 @@ export class Lung_RADS extends React.Component {
         var patient = this.props.patient
 
         //TODO: Sort by date
-        if(patient.results.length > 1) {
-            var growth = this.getNoduleSize(patient.results[0].nodules[nodule]) - this.getNoduleSize(patient.results[1].nodules[nodule])
+        if(this.state.results.length > 1 && this.state.results[0].nodules.length > 0) {
+            var growth = this.getNoduleSize(this.state.results[0].nodules[nodule]) - this.getNoduleSize(this.state.results[1].nodules[nodule])
             growing = growth > growthThreshold;
             growingSlowly = growth <= growthThreshold && growth > slowGrowthThreshold
             unchanged = !growing && !growingSlowly
 
-            if(patient.results[0].nodules.length > patient.results[1].nodules.length)
+            if(this.state.results[0].nodules.length > this.state.results[1].nodules.length)
                 new_nodules = true;
-        } else if(patient.results[0].nodules.length > 0) {
+        } /*else if(this.state.results[0].nodules.length > 0) {
             new_nodules = true;
-        }
+        }*/
 
         var evalPred = (obj, nn = 0) => {
             if(!(typeof obj === 'object')) {
@@ -108,8 +144,8 @@ export class Lung_RADS extends React.Component {
 
             switch(key) {
                 case "count": {
-                    if(Array.isArray(patient.results[0][pred.field]) &&
-                        patient.results[0][pred.field].length == pred.value)
+                    if(Array.isArray(this.state.results[0][pred.field]) &&
+                        this.state.results[0][pred.field].length == pred.value)
                         return true
                     else
                         return false
@@ -147,21 +183,21 @@ export class Lung_RADS extends React.Component {
                 }
                 case "lt": {
                     // TODO: only cares about one nodule, should probably do them all
-                    return patient.results[0].nodules[nn][pred.field] < pred.value
+                    return this.state.results[0].nodules[nn][pred.field] < pred.value
                 }
                 case "gte": {
-                    return patient.results[0].nodules[nn][pred.field] >= pred.value
+                    return this.state.results[0].nodules[nn][pred.field] >= pred.value
                 }
                 case "eq": {
-                    return patient.results[1].nodules[nn][pred.field] == pred.value
+                    return this.state.results[1].nodules[nn][pred.field] == pred.value
                 }
                 case "change": {
                     var time = 0
-                    var first = new Date(patient.results[0].date)
+                    var first = new Date(this.state.results[0].date)
                     var fields = pred.field.split('|')
-                    for(var i = 1; i < patient.results.length; i++) {
-                        var nodules = patient.results[i].nodules
-                        var prev = patient.results[0].nodules
+                    for(var i = 1; i < this.state.results.length; i++) {
+                        var nodules = this.state.results[i].nodules
+                        var prev = this.state.results[0].nodules
                         if(nodules.length != prev.length)
                             return false
 
@@ -196,7 +232,7 @@ export class Lung_RADS extends React.Component {
                         }
 
                         // No change, check timeframe
-                        var check = new Date(patient.results[i].date) 
+                        var check = new Date(this.state.results[i].date) 
                         var yearsDif = first.getFullYear() - check.getFullYear()
                         var monthsDif = yearsDif*12 + first.getMonth() - check.getMonth()
                         if(monthsDif > pred.since)
@@ -215,11 +251,14 @@ export class Lung_RADS extends React.Component {
                 // TODO: style as colored if predicate is true?
                 // Check current nodule for predicate
 
-                var satisfy = patient.results[0].nodules.filter((y, iy) => {
-                    return evalPred(x.predicate, iy)
-                }).map(y => {
-                    return y.nodule_number
-                })
+                var satisfy = []
+                if(this.state.results.length > 0) {
+                    satisfy = this.state.results[0].nodules.filter((y, iy) => {
+                        return evalPred(x.predicate, iy)
+                    }).map(y => {
+                        return y.nodule_number
+                    })
+                }
 
                 var style = {}
                 if(satisfy.length == 0) {
@@ -236,11 +275,11 @@ export class Lung_RADS extends React.Component {
             })
         }
 
-        var summary = JSON.stringify(patient.results, undefined, 2)
+        var summary = JSON.stringify(this.state.results, undefined, 2)
 
         var data = []
-        patient.results.map(x => {
-            var obj = {date:x.date}
+        this.state.results.map(x => {
+            var obj = {date:x.date, createdAt:x.createdAt}
             for(let i = 0; i < x.nodules.length; i++) {
                 var keys = ["solid", "partsolid", "GGN"]
                 for(let j = 0; j < keys.length; j++) {
@@ -254,24 +293,43 @@ export class Lung_RADS extends React.Component {
 
         // Sort by date
         data = data.sort((a, b) => {
-            return new Date(a.date) - new Date(b.date)
+            return a.createdAt.localeCompare(b.createdAt)//new Date(a.date) - new Date(b.date)
         })
 
 
-        var getGraph = (nodule_num) => {
-            var keys = ["solid", "partsolid", "GGN"]
+        var getGraph = (nodule_number) => {
+            var keys = ['solid', 'partsolid', 'partsolid-solid', 'GGN']
+            var nodule = null
+            for(let i = 0; i < this.state.results[0].nodules.length; i++) {
+                var nod = this.state.results[0].nodules[i]
+                if(nod.nodule_number == nodule_number) {
+                    nodule = nod
+                }
+            }
+            if(!nodule)
+                return null
+
             var lineKeys = keys.filter(x => {
-                return x in patient.results[0].nodules[nodule_num]
+                return x in nodule
             }).map(x => {
-                return "nodule_"+nodule_num+"_"+x
+                return {
+                    key:x,
+                    dataKey: "nodule_"+nodule_number+"_"+x
+                }
             }) 
-            var colors = ["red", "blue", "green"]
+            //var colors = ["red", "blue", "green"]
+            var colors = {
+                'solid': 'red',
+                'partsolid': 'blue',
+                'GGN': 'green',
+                'partsolid-solid':'red',
+            }
             var lines = lineKeys.map((x, ix) => { 
-                return <Line key={ix} type="monotone" dataKey={x} stroke={colors[ix]} yAxisId={0} /> 
+                return <Line key={ix} type="monotone" dataKey={x.dataKey} stroke={colors[x.key]} yAxisId={0} /> 
             })
 
             return (<LineChart
-                key={nodule_num}
+                key={nodule_number}
                 width={600}
                 height={400}
                 data={data}
@@ -434,12 +492,12 @@ export class Lung_RADS extends React.Component {
                 {this.state.hover && 
                     <div className="hover noselect" style={{left:this.state.hoverPos[0], top:this.state.hoverPos[1]}}> 
                         {/*<pre>{summary}</pre>*/}
-                        {this.state.showNodules.map((x) => {
+                        {this.state.results.length > 0 && this.state.showNodules.map((x) => {
                             return getGraph(x)
                         })}
                     </div>
                 }
-                {patient.results[0].nodules.map((x, ix) => {
+                {this.state.results.length > 0 && this.state.results[0].nodules.map((x, ix) => {
                     return getGraph(ix)
                 })}
 
@@ -447,3 +505,19 @@ export class Lung_RADS extends React.Component {
         );
     }
 }
+
+function mapState(state) {
+    const {  study, response } = state
+
+    var form = null
+    if('PKG_LDCT_LUNG' in state.form.cache)
+        form = state.form.cache['PKG_LDCT_LUNG']
+
+    return { form, study, response }
+}
+  
+const actionCreators = {
+}
+
+const connectedLung_RADS = connect(mapState, actionCreators)(Lung_RADS)
+export { connectedLung_RADS as Lung_RADS }

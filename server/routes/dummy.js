@@ -603,7 +603,6 @@ export default (passport) => {
 	})
 
 	router.get('/response/clear', (req, res) => {
-		
 		clearLinks()
 		.then(clearResponses)
 		.then(() => {

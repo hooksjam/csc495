@@ -39,19 +39,19 @@ class Options extends React.Component {
         this.setState({clearingEverything:false})
     }
 
-    async clearAnswers(e) {
-        this.setState({clearingAnswers:true})
-        await this.props.clear('responses')
-        this.setState({clearingAnswers:false})
-    }
-
     async clearResponses(e) {
         this.setState({clearingResponses:true})
-        await this.props.clear('answers')
+        await this.props.clear('response')
         this.setState({clearingResponses:false})
     }
 
-    async startResponses(e) {
+    async clearAnswers(e) {
+        this.setState({clearingAnswers:true})
+        await this.props.clear('answer')
+        this.setState({clearingAnswers:false})
+    }
+
+    async startForms(e) {
         this.setState({forming:true})
         await this.props.reloadForms()
         this.setState({forming:false})

@@ -3,6 +3,7 @@ import { Axios } from 'Helpers'
 async function clear(prefix='') {
     let response = {};
     var clearString = (prefix!=''?`${prefix}/clear`:'clear')
+    console.log("CLEAR", `/api/dummy/${clearString}`)
     response = await Axios.get(`/api/dummy/${clearString}`)
 
     return response.data;

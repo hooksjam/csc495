@@ -25,7 +25,6 @@ async function addResponse(formFillerID, patientID, diagnosticProcedureDI) {
 }
 
 async function addAnswer(answer) {
-    console.log("ADD ANSWER", answer)
     let responses = {}
     try {
         responses = await Axios.post(`/api/response/answer`, {answer} )
