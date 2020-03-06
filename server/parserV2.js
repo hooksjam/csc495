@@ -82,6 +82,13 @@ function transformXMLToForm(xmlData) {
 				parentNode.dependencies.push({nodeID: node.referenceID})
 		}	
 	}
+
+	var getReferenceID = (obj) => {
+		if(obj.attr.name)
+			return `${obj.attr.name}_${obj.attr.ID}`
+		else
+			return `${obj.attr.ID}`
+	}
 	var traverse = (name, parent, obj) => {
 		if(obj == null) {
 			console.log(name + " is null")
@@ -110,7 +117,7 @@ function transformXMLToForm(xmlData) {
 		} else if(name == "Section") {
 			var section = new SDCFormNode()
 			section.title = obj.attr.title
-			section.referenceID = `${obj.attr.name}_${obj.attr.ID}`
+			section.referenceID = getReferenceID(obj)
 			section.nodeType = "Section"
 			addDependency(section)
 
@@ -134,7 +141,7 @@ function transformXMLToForm(xmlData) {
 		} else if(name == "DisplayedItem") {
 			var item = new SDCFormNode()
 			item.title = obj.attr.title
-			item.referenceID = `${obj.attr.name}_${obj.attr.ID}`
+			item.referenceID = getReferenceID(obj)
 			//item.referenceID = obj.attr.ID
 			item.nodeType = "Item"
 			addDependency(item)
@@ -144,7 +151,7 @@ function transformXMLToForm(xmlData) {
 		} else if(name == "Question") {	
 			var question = new SDCFormNode()
 			question.title = obj.attr.title
-			question.referenceID = `${obj.attr.name}_${obj.attr.ID}`
+			question.referenceID = getReferenceID(obj)
 			//question.referenceID = obj.attr.ID
 			question.nodeType =  "Question"
 			addDependency(question)
@@ -230,7 +237,7 @@ function transformXMLToForm(xmlData) {
 			if(question) {
 				var choice = new SDCFormChoice()
 				choice.title = obj.attr.title
-				choice.referenceID = `${obj.attr.name}_${obj.attr.ID}`
+				choice.referenceID = getReferenceID(obj)
 				// choice.referenceID = obj.attr.ID
 
 				question.choices.push(choice)

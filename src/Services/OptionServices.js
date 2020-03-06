@@ -1,8 +1,9 @@
-import { Axios } from 'Helpers';
+import { Axios } from 'Helpers'
 
-async function clear() {
+async function clear(prefix='') {
     let response = {};
-    response = await Axios.get(`/api/dummy/clear`)
+    var clearString = (prefix!=''?`${prefix}/clear`:'clear')
+    response = await Axios.get(`/api/dummy/${clearString}`)
 
     return response.data;
 }
@@ -17,4 +18,4 @@ async function reloadForms() {
 export const OptionServices = {
     clear,
     reloadForms,
-};
+}

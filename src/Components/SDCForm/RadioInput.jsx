@@ -17,6 +17,7 @@ export class RadioInput extends React.Component {
         this.state = {
             selectedChoice: undefined,
             showOnSelection: true,
+            responseID:null,
         }
 
         this.onChange = this.onChange.bind(this)
@@ -24,24 +25,38 @@ export class RadioInput extends React.Component {
         this.getSubNodes = this.getSubNodes.bind(this)
     }
 
+
     static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.response && nextProps.response.answers) {
-            let answer = nextProps.response.answers.filter(answer => answer.nodeID === nextProps.node.referenceID)[0];
-            if (answer !== undefined && answer.choices && answer.choices.length > 0){
-                let choice = answer.choices[0];
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if(nextProps.response != null && nextProps.node != null && (prevState.selectedChoice == null || nextProps.response._id != prevState.responseID)) {
+            var key = `${nextProps.node.referenceID}_${nextProps.instance}`
+            var answer = nextProps.response.map[key]
+            if(answer && answer.choices.length > 0) {
                 return {
-                    selectedChoice: choice.choiceID
+                    selectedChoice:answer.choices[0].choiceID,
+                    responseID: nextProps.response._id
                 }
             }
         }
+        if(nextProps.response != null)
+            return {responseID:nextProps.response._id}
         return null
     }
 
     onChange(e) {
-        if(this.state.selectedChoice == e.target.id)
-            this.setState({selectedChoice:null})
-        else
+        if(this.state.selectedChoice == e.target.id) {
+            //this.setState({selectedChoice:null})
+            return
+        } else {
             this.setState({selectedChoice:e.target.id})
+        }
+
+        var answer = {instance:this.props.instance}
+        answer.choices = [{choiceID:e.target.id}]
+        console.log("ANSWER", answer)
+        this.props.addAnswer(this.props.response, this.props.node, answer)
         return null
         /*if (e.target.getAttribute("index") === undefined || e.target.getAttribute("index") == null) {
             console.log(e.target)
@@ -106,6 +121,7 @@ export class RadioInput extends React.Component {
                     getChildrenFn={this.props.getChildrenFn}
                     response={this.props.response}
                     depth={this.props.depth}
+                    instance={this.props.instance}
                     />
                 })}
         </div>)
@@ -113,7 +129,14 @@ export class RadioInput extends React.Component {
 
     getField(choice) {
         if(choice.field) {
-            return <TextInput referenceID={this.props.node.referenceID} choiceID={choice.referenceID} field={choice.field} addAnswer={this.props.addAnswer} response={this.props.response}/>
+            return <TextInput 
+                node={this.props.node}
+                choiceID={choice.referenceID} 
+                field={choice.field} 
+                addAnswer={this.props.addAnswer} 
+                response={this.props.response}
+                instance={this.props.instance}
+                disabled={this.state.selectedChoice != choice.referenceID}/>
         } else {
             return null
         }
@@ -146,67 +169,5 @@ export class RadioInput extends React.Component {
             {this.getChoices()}
             </div>
         )
-        /*return (
-            <FormControl onChange={this.onChange.bind(this)}>
-                <FormLabel />
-                <RadioGroup>
-                    {this.props.node.choices.map((choice, index) => {
-
-                        let checked = selectedChoice === choice.referenceID;
-
-                        const subQuestions = this.getSubQuestions(choice.referenceID);
-                        let subQuestionsList = null;
-                        if (subQuestions.length > 0) {
-                            subQuestionsList = (
-                                <Collapse in={checked}>
-                                    <List>{subQuestions}</List>
-                                </Collapse>
-                            );
-                        }
-
-                        let field = null;
-                        if (choice.hasOwnProperty('field')) {
-                            field = (
-                                <Collapse in={checked}>
-                                    <TextField
-                                        color="primary"
-                                        fullWidth={true}
-                                        inputProps={{
-                                            index:index
-                                        }}
-                                    />
-                                </Collapse>
-                            );
-                        }
-
-                        return (
-                            <React.Fragment>
-                                <FormControlLabel 
-                                    value={choice.title}
-                                    label={<Typography variant="h5">{choice.title}</Typography>}
-                                    control={
-                                        <Radio
-                                            key={choice.referenceID}
-                                            id={choice.referenceID}
-                                            inputProps={{
-                                                index: index
-                                            }}
-                                            checked={checked}
-                                            type="checkbox"
-                                            color="primary"
-                                            name={this.props.node.referenceID}
-                                            value={choice.title}
-                                        />
-                                    }
-                                    key={choice.referenceID}                                
-                                />
-                                {field}
-                                {subQuestionsList}
-                            </React.Fragment>
-                        );
-                    })}
-                </RadioGroup>
-            </FormControl>
-        );*/
     }
 }

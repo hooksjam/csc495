@@ -18,11 +18,11 @@ function reloadForms() {
     function failure(error) { return { type: OptionConstants.CLEAR_FAILURE, error } }
 }
 
-function clear() {
+function clear(prefix='') {
     return async dispatch => {
         dispatch(request());
 
-        await OptionServices.clear()
+        await OptionServices.clear(prefix)
             .then(
                 x => dispatch(success(x)),
                 error => dispatch(failure(error.toString()))
@@ -34,6 +34,7 @@ function clear() {
     function success(x) { return { type: OptionConstants.CLEAR_SUCCESS, x } }
     function failure(error) { return { type: OptionConstants.CLEAR_FAILURE, error } }
 }
+
 
 export const OptionActions = {
     reloadForms,

@@ -1,4 +1,4 @@
-import React from "react";
+ import React from "react";
 
 import {FormActions} from "Actions";
 
@@ -8,43 +8,93 @@ export class TextInput extends React.Component {
 
         this.state = {
             errorText: '',
-            value: ''
+            value: '',
+            responseID: null, 
         };
 
         this.saveTimeout = undefined;
         this.onChange = this.onChange.bind(this)
     }
 
-    static getDerivedStateFromProps(nextProps, prevState) {
-        if (nextProps.response !== undefined && nextProps.response.answers !== undefined && prevState.value === ""){
-            /*let answer = nextProps.response.answers.filter(answer => answer.nodeID === nextProps.node.referenceID)[0];
-            let value = "";
-            if (answer !== undefined) {
-                let key = "stringValue"
-                if (nextProps.field.valueType === "decimal") {
-                    key = "numberValue"
-                }
-                value = answer.field[key]
-            }
-            return {
-                value:value
-            }*/
+    componentDidUpdate(prevProps, prevState) {
+        if(prevProps.disabled && !this.props.disabled && this.state.value != "") {
+            this.onChange()
         }
+    }
+
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if(nextProps.response != null && nextProps.node != null && (prevState.value == "" || nextProps.response._id != prevState.responseID)) {
+        //if (nextProps.response !== undefined && nextProps.response.answers !== undefined && prevState.value === ""){
+            var key = `${nextProps.node.referenceID}_${nextProps.instance}`
+            var answer = nextProps.response.map[key]
+            if(answer) {
+                if(nextProps.choiceID != null && nextProps.node.choices != null)
+                {
+                    var choice = nextProps.node.choices.find(x => {return x.referenceID == nextProps.choiceID})
+                    if(choice != null && choice.field) {
+                        var type = "numberValue"
+                        if(choice.field.valueType == "string")
+                            type = "stringValue"
+
+                        var answerChoice = answer.choices.find(x => {return x.choiceID == nextProps.choiceID})
+                        if(answerChoice && answerChoice.field) {
+                            var value = answerChoice.field[type]
+                            if(value != null) {
+                                return {
+                                    value:value,
+                                    responseID: nextProps.response._id,
+                                }
+                            }
+                        }
+                    }
+                } else if(answer.field) {
+                    var type = "numberValue"
+                    if(nextProps.node.field.valueType == "string")
+                        type = "stringValue"
+
+                    var value = answer.field[type]
+                    if(value != null) {
+                        return {
+                            value:value,
+                            responseID: nextProps.response._id,
+                        }
+                    }
+                }
+            }
+        }
+        if(nextProps.response != null)
+            return {responseID:nextProps.response._id}
         return null
     }
 
-    onChange(e) {
-        var value = e.target.value
-        this.setState({value:value})
+    onChange(e=null) {
+        var value
+        if(e != null) {
+            value = e.target.value
+            this.setState({value:value})
+        } else {
+            value = this.state.value
+        }
 
         if (this.saveTimeout != null){
             clearTimeout(this.saveTimeout)
         }
+
+        var instance = this.props.instance
+        var choiceID = this.props.choiceID
+        var node = this.props.node
+        var response = this.props.response
         this.saveTimeout = setTimeout(function() {
             this.saveTimeout = null
             if (value === this.state.value){
-                console.log(this.props)
-                this.props.addAnswer(this.props.response, this.props.node, {stringValue:value})
+                var answer = {instance:instance}
+                if(choiceID) {
+                    answer.choices= [{choiceID:choiceID, field: {stringValue:value}}]
+                } else {
+                    answer.field= {stringValue:value}
+                }
+
+                this.props.addAnswer(response, node, answer)
             }
         }.bind(this), 500)
         return 
@@ -92,10 +142,11 @@ export class TextInput extends React.Component {
         return (
         <input
             className="textInput"
-            name={this.props.referenceID}
+            name={this.props.node.referenceID}
             error={this.state.error}
             value={this.state.value}
-            onChange={this.onChange}>
+            onChange={this.onChange}
+            disabled={this.props.disabled}>
         </input>
         )
     }

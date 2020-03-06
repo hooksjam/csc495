@@ -41,12 +41,6 @@ export class Section extends React.Component {
 
 
     getSubNodes() {   
-
-        if(this.props.node.nodeType == "Section") {
-            console.log("Section", this.props.node.title)
-            console.log("children", this.props.node.dependencies)
-        }
-
         if (!this.props.node.dependencies || this.props.node.dependencies.length == 0)
             return null
 
@@ -54,10 +48,6 @@ export class Section extends React.Component {
 
         if(filtered.length == 0)
             return null
-
-        if(this.props.node.nodeType == "Section") {
-            console.log("fitlered", filtered)
-        }
 
         return filtered.map((node, ix) => {
             return <Node
@@ -70,6 +60,7 @@ export class Section extends React.Component {
                     response={this.props.response}
                     helpers={this.props.helpers}
                     depth={this.props.depth}
+                    instance={this.props.instance}
                     />
             })
     }

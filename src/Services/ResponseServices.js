@@ -4,7 +4,7 @@ async function getResponseList(formFillerID, patient) {
     let responses = {}
     
     try {
-        responses = await Axios.get(`/api/response/search?formFillerID=${formFillerID}&patientID=${patient}`)
+        responses = await Axios.get(`/api/response/search?full=1&formFillerID=${formFillerID}&patientID=${patient}`)
     } catch(e) {
         console.log(e)
         return responses
@@ -24,12 +24,11 @@ async function addResponse(formFillerID, patientID, diagnosticProcedureDI) {
     return responses.data
 }
 
-async function addAnswer(responseID, nodeID, answer) {
+async function addAnswer(answer) {
     console.log("ADD ANSWER", answer)
-    return null
     let responses = {}
     try {
-        responses = await Axios.post(`/api/response/answer`, {responseID, nodeID, answer} )
+        responses = await Axios.post(`/api/response/answer`, {answer} )
     } catch(e) {
         console.log(e)
         return {}

@@ -70,15 +70,40 @@ export default (passport) => {
 			query.diagnosticProcedureID = req.query.diagnosticProcedureID
 		}
 
-		SDCFormResponse.find(query).sort('-updatedAt').exec((err, resp) => {
-				if (err) {
-					util.errorMessage(res, err, "finding SDC forms");
-				} else if(resp.length == 0) {
-					res.send([])
+		SDCFormResponse.find(query).sort('-updatedAt').exec()
+		.then(resp => {
+			if(resp.length == 0) {
+				res.send([])
+			} else {
+				if(req.query.full != null) {
+					// Get answers for response
+					if(resp.length == 0) {
+						res.send([])
+						return
+					}
+
+					Promise.all(resp.map(x => {
+						return SDCFormAnswer.find({responseID:x._id.toString()})
+						.then(answers => {
+							x = x.toObject()
+							x.answers = answers;
+							return x
+						})
+					}))
+					.then(resp => {
+						console.log("FULL ANSWERS", resp)
+						res.send(resp)
+					})
+					.catch(err => {
+						util.errorMessage(err, "getting answers")
+					})
 				} else {
 					res.send(resp)
 				}
-			})
+			}	
+		}).catch(err => {
+			util.errorMessage(res, err, "finding SDC forms");
+		})
 	})
 
 	/**
@@ -192,18 +217,20 @@ export default (passport) => {
 			util.errorMessage(res, 'no answer provided')
 		}
 		var newAnswer = req.body.answer
+		console.log("NEW ANSWER", newAnswer)
 
 		// Update saved date
 		var timestamp = util.timestamp();
 
 		// Update or create new answer
-		SDCFormAnswer.findOne({responseID: newAnswer.responseID, nodeID: newAnswer.nodeID}, (err, answer) => {
+		SDCFormAnswer.findOne({responseID: newAnswer.responseID, nodeID: newAnswer.nodeID, instance:newAnswer.instance}, (err, answer) => {
 			if(err)
 				util.errorMessage(res, err, "getting answer")
 			else if(!answer) {
 				answer = new SDCFormAnswer()
 				answer.responseID = newAnswer.responseID
 				answer.nodeID = newAnswer.nodeID
+				answer.instance = newAnswer.instance
 			} 
 
 			if(newAnswer.field != null) {
@@ -284,6 +311,7 @@ export default (passport) => {
 
 		var responseID = req.query.responseID
 		var nodeID = req.query.nodeID
+
 		SDCFormAnswer.findOne({responseID: responseID, nodeID: nodeID}, (err, answer) => {
 			if(err)
 				util.errorMessage(res, err, "getting answer")

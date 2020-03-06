@@ -18,7 +18,7 @@ var SDCFormAnswerSchema = new Schema({
 	_id: {type: mongoose.Types.ObjectId, auto: true},
 	responseID: {type: String},
 	nodeID: {type: String},
-	instance: {type: String},
+	instance: {type: Number, default:undefined},
 	choices: {type: [SDCChoiceAnswer], default:undefined},
 	field: {type: SDCFieldAnswer, default:undefined}
 }, {collection: 'SDCFormAnswer'})

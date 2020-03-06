@@ -42,12 +42,11 @@ export class Node extends React.Component {
                     showID={this.state.showID}
                     helpers={this.props.helpers}
                     depth={this.props.depth}
+                    instance={this.props.instance}
                 />
             )
         } else if(this.props.node.nodeType == "Section") {
-            console.log("SECITON MaX INSTANCES",this.props.node.title, this.props.node.maxInstances)
-        	if(this.props.sectionID == null && this.props.node.maxInstances && this.props.node.maxInstances > 0)
-        	{
+        	if(this.props.sectionID == null && this.props.node.maxInstances && this.props.node.maxInstances > 0) {
         		return (
         			<MultiSection
         				key={this.props.id}
@@ -58,6 +57,7 @@ export class Node extends React.Component {
 	                    showID={this.state.showID}
                     	helpers={this.props.helpers}
                         depth={this.props.depth+1}
+                        instance={this.props.instance}
 	                />
         		)
 
@@ -73,6 +73,7 @@ export class Node extends React.Component {
 	                    sectionID={this.props.sectionID}
                     	helpers={this.props.helpers}
                         depth={this.props.depth+1}
+                        instance={this.props.instance}
 	                />
 	            )
 	        }
@@ -84,6 +85,7 @@ export class Node extends React.Component {
                     addAnswer={this.props.addAnswer}
                     showID={this.state.showID}
                     depth={this.props.depth}
+                    instance={this.props.instance}
                 />)
         }
     }

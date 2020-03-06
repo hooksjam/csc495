@@ -1,6 +1,6 @@
 $form-bg-primary:#eeeeed;//#ADD8E6;
 $form-bg-secondary:#326295;//#000080;
-$form-nav-width:200px;
+$form-nav-width:150px;
 
 .SDCForm {
 	display:flex;
@@ -99,6 +99,7 @@ $form-nav-width:200px;
 
 
 .section {
+	width:100%;
 	transition: background-color ease-in-out 0.1s;
 }
 
@@ -126,6 +127,7 @@ $form-nav-width:200px;
 	display:flex;
 	flex-direction:column;
 	position:relative;
+	width:100%;
 }
 
 .questionTitle {
@@ -134,7 +136,7 @@ $form-nav-width:200px;
 	padding:2px;
 	cursor:pointer;
 
-	height:24px;
+	min-height:24px;
 	display:flex;
 	flex-direction:row;
 	position:relative;
@@ -180,7 +182,7 @@ $form-nav-width:200px;
 	.optionLabel {
 		// line-height:30px;
 		//font-weight:100;
-		white-space: nowrap;
+		//white-space: nowrap;
 		margin:0 0 0 5px;
 		// line-height:26px;
 	}

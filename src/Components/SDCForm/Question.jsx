@@ -64,6 +64,9 @@ export class Question extends React.Component {
                     response={this.props.response}
                     helpers={this.props.helpers}
                     depth={this.props.depth}
+                    instance={this.props.instance}
+
+                    
                     />
             })
     }
@@ -73,16 +76,33 @@ export class Question extends React.Component {
             if(this.props.node.choices.length == 0)
                 return null
             if (this.props.node.maxSelections === 1) {
-                return <RadioInput node={this.props.node} showID={this.props.showID} addAnswer={this.props.addAnswer} response={this.props.response} getChildrenFn={this.props.getChildrenFn}/>
+                return <RadioInput 
+                    node={this.props.node} 
+                    showID={this.props.showID} 
+                    addAnswer={this.props.addAnswer} 
+                    response={this.props.response} 
+                    getChildrenFn={this.props.getChildrenFn}
+                    instance={this.props.instance}
+                />
             } else {
-                return <CheckboxInput node={this.props.node} showID={this.props.showID} addAnswer={this.props.addAnswer} response={this.props.response} getChildrenFn={this.props.getChildrenFn}/>
+                return <CheckboxInput 
+                    node={this.props.node} 
+                    showID={this.props.showID} 
+                    addAnswer={this.props.addAnswer} 
+                    response={this.props.response} 
+                    getChildrenFn={this.props.getChildrenFn}
+                    instance={this.props.instance}
+                />
             }
         } else {
             return <TextInput 
                 node={this.props.node} 
                 field={this.props.node.field} 
                 addAnswer={this.props.addAnswer} 
-                response={this.props.response}/>
+                response={this.props.response}
+                instance={this.props.instance}
+                />
+
         }
 
     }

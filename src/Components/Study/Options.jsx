@@ -7,12 +7,16 @@ class Options extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            clearing:false,
+            clearingEverything:false,
+            clearingAnswers:false,
+            clearingResponses:false,
             forming:false,
         }
         this.handleClick= this.handleClick.bind(this)
-        this.startClear = this.startClear.bind(this)
         this.startForms = this.startForms.bind(this)
+        this.clearEverything = this.clearEverything.bind(this)
+        this.clearResponses = this.clearResponses.bind(this)
+        this.clearAnswers = this.clearAnswers.bind(this)
     }
 
     componentDidMount() {
@@ -29,13 +33,25 @@ class Options extends React.Component {
         }
     } 
 
-    async startClear(e) {
-        this.setState({clearing:true})
+    async clearEverything(e) {
+        this.setState({clearingEverything:true})
         await this.props.clear()
-        this.setState({clearing:false})
+        this.setState({clearingEverything:false})
     }
 
-    async startForms(e) {
+    async clearAnswers(e) {
+        this.setState({clearingAnswers:true})
+        await this.props.clear('responses')
+        this.setState({clearingAnswers:false})
+    }
+
+    async clearResponses(e) {
+        this.setState({clearingResponses:true})
+        await this.props.clear('answers')
+        this.setState({clearingResponses:false})
+    }
+
+    async startResponses(e) {
         this.setState({forming:true})
         await this.props.reloadForms()
         this.setState({forming:false})
@@ -51,8 +67,14 @@ class Options extends React.Component {
                     </div>
                     <div className="navGroup vertical">
                         <h3> Options </h3>
-                        <div className={`navItem ${this.state.clearing?"disabled":""}`} onClick={this.startClear}>
-                            <span>Clear</span>
+                        <div className={`navItem ${this.state.clearingEverything?"disabled":""}`} onClick={this.clearEverything }>
+                            <span>Clear Everything</span>
+                        </div>
+                        <div className={`navItem ${this.state.clearingResponses?"disabled":""}`} onClick={this.clearResponses}>
+                            <span>Clear Responses</span>
+                        </div>
+                        <div className={`navItem ${this.state.clearingAnswers?"disabled":""}`} onClick={this.clearAnswers}>
+                            <span>Clear Answers</span>
                         </div>
                         <div className={`navItem ${this.state.forming?"disabled":""}`} onClick={this.startForms}>
                             <span>Reload Forms</span>

@@ -580,5 +580,39 @@ export default (passport) => {
 
 	})
 
+	router.get('/answer/clear', (req, res) => {
+		clearAnswers()
+		.then(() => {
+			return new Promise((resolve, reject) => {
+				if(req.query.clear != 0) { 
+					elastic.deleteIndex() 
+					.then(elastic.initIndex)
+					.then(resolve)
+					.catch(reject)
+				} else {
+					resolve()
+				}
+			})
+		})
+		.then(() => {
+			res.sendStatus(200)
+		})
+		.catch(err => {
+			res.sendStatus(500)
+		})
+	})
+
+	router.get('/response/clear', (req, res) => {
+		
+		clearLinks()
+		.then(clearResponses)
+		.then(() => {
+			res.sendStatus(200)
+		})
+		.catch(err => {
+			res.sendStatus(500)
+		})
+	})
+
 	return router
 }

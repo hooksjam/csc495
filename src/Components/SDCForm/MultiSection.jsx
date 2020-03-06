@@ -17,6 +17,7 @@ export class MultiSection extends React.Component {
             currentSection:0,
             sections:[],
             sectionCounter:0,
+            responseID:null,
         }
         this.toggleExpand = this.toggleExpand.bind(this)
         this.toggleEvent = this.toggleEvent.bind(this)
@@ -48,6 +49,18 @@ export class MultiSection extends React.Component {
             expanded: !this.state.expanded
         });
     }
+    static getDerivedStateFromProps(nextProps, prevState) {
+        if(nextProps.response != null && nextProps.node != null && (prevState.sectionCount == 0 || nextProps.response._id != prevState.responseID)) {
+            var i = 0
+
+            for(var i = 0; i < nextProps.node.maxInstances; i++) {
+                var key = `${nextProps.node.referenceID}_${i}`
+                if(!(key in nextProps.response.map))
+                    break
+            }
+            return {sectionCount: i, responseID:nextProps.response._id}
+        }
+    }
 
     addSection() {
         if(this.state.sectionCount < this.props.node.maxInstances) {
@@ -61,7 +74,8 @@ export class MultiSection extends React.Component {
                 showID={this.state.showID}
                 />
             ) */
-            this.setState({sectionCount:this.state.sectionCount+1, sections:this.state.sections, sectionCounter:this.state.sectionCounter+1})
+            this.setState({currentSection: this.state.sectionCount, sectionCount:this.state.sectionCount+1, sections:this.state.sections, sectionCounter:this.state.sectionCounter+1})
+            this.props.addAnswer(this.props.response, this.props.node, {instance:this.state.sectionCount})
         }
     }
 
@@ -94,9 +108,11 @@ export class MultiSection extends React.Component {
                 key={`${this.props.id}_${i}`}
                 sectionID={i}
                 node={this.props.node}
+                addAnswer={this.props.addAnswer}
                 getChildrenFn={this.props.getChildrenFn}
                 response={this.props.response}
                 showID={this.state.showID}
+                instance={i}
                 />
             )
         }
@@ -147,13 +163,15 @@ export class MultiSection extends React.Component {
                     <div className="subnodes">
                         <Node
                             key={`${this.props.id}_${this.state.currentSection}`}
-                            sectionID={this.state.currentSection}
                             node={this.props.node}
+                            sectionID={this.state.currentSection}
+                            addAnswer={this.props.addAnswer}
                             getChildrenFn={this.props.getChildrenFn}
                             response={this.props.response}
                             showID={this.state.showID}
                             helpers={this.props.helpers}
                             depth={this.props.depth}
+                            instance={this.state.currentSection}
                             />
                     </div>}
                     {this.state.sectionCount > 0 && this.getNav()}
