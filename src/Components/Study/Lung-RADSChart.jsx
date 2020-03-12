@@ -302,7 +302,6 @@ class Lung_RADSChart extends React.Component {
 function mapState(state) {
     const {  study } = state
 
-    console.log("STUDY!", study)
     return { results:study.results, answers:study.answers }
 }
   

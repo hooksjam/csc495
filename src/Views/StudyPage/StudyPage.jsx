@@ -168,12 +168,12 @@ class StudyPage extends React.Component {
 
     static getDerivedStateFromProps(nextProps, prevState) {
         var newState = {}
-        if(nextProps.study.patients.length != prevState.currentResult.length) {
-            newState.currentResult = nextProps.study.patients.map(x => {return 0})
+        if(nextProps.patients.length != prevState.currentResult.length) {
+            newState.currentResult = nextProps.patients.map(x => {return 0})
         } 
         newState.patients = []
-        for(let i = 0; i < nextProps.study.patients.length; i++) {
-            var patient = JSON.parse(JSON.stringify(nextProps.study.patients[i]))
+        for(let i = 0; i < nextProps.patients.length; i++) {
+            var patient = JSON.parse(JSON.stringify(nextProps.patients[i]))
             if(patient.id in nextProps.response.results) {
                 patient.results = nextProps.response.results[patient.id].map(x => {return nextProps.response.cache[x]})
             } else {
@@ -249,8 +249,10 @@ class StudyPage extends React.Component {
         var result = this.getCurrentResult()
         if(result) {
             var style = {height:"100%", "display":"flex"}
-            if(this.state.currentMode != 1)
+            if(this.state.currentMode != 1) {
                 style.display = "none"
+                return null
+            }
 
 
 
@@ -501,7 +503,7 @@ function mapState(state) {
     const { form, authentication, study, response } = state
     const { user } = authentication
 
-    return { user, form, study, response }
+    return { user, form, patients:study.patients, response }
 }
   
 const actionCreators = {

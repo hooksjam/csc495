@@ -70,10 +70,10 @@ export class TextInput extends React.Component {
 
     onChange(e=null) {
         var value
-        console.log("CHANGE!", e.target.value, e.target.value == '')
+        // console.log("CHANGE!", e.target.value, e.target.value == '')
         if(e != null) {
             value = e.target.value
-            console.log("Setting value to ", value)
+            // console.log("Setting value to ", value)
             this.setState({value:value})
         } else {
             value = this.state.value
