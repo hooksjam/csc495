@@ -144,6 +144,8 @@ class StudyPage extends React.Component {
         this.viewForms = this.viewForms.bind(this)
         this.addResult = this.addResult.bind(this)
         this.setProcedure = this.setProcedure.bind(this)
+
+        this.focusResult = this.focusResult.bind(this)
     }
 
     async componentDidMount() {
@@ -180,6 +182,24 @@ class StudyPage extends React.Component {
             newState.patients.push(patient)
         }
         return newState
+    }
+
+    focusResult(responseID, nodeID) {
+        console.log("FOCUS!", responseID, nodeID, this.state)
+        var match = -1 
+        var results = this.state.patients[this.state.currentPatient].results
+        for(var i = 0; i < results.length; i++) {
+            if(results[i]._id == responseID) {
+                match = i
+                break
+            }
+        }
+        if(match != -1) {
+            console.log("Focus on result", match)
+            var newState = {...this.state, currentMode:0}
+            newState.currentResult[this.state.currentPatient] = match
+            this.setState(newState)
+        }
     }
 
     getCurrentResult() {
@@ -223,12 +243,12 @@ class StudyPage extends React.Component {
     }
 
     getStudyAid() {
-        if(this.state.patients.length == 0 || this.state.patients[this.state.currentPatient].results.length == 0)
+        if(this.state.patients.length == 0 || this.state.patients[this.state.currentPatient].results.length == 0 || !this.props.form)
             return null
 
         var result = this.getCurrentResult()
         if(result) {
-            var style = {height:"100%"}
+            var style = {height:"100%", "display":"flex"}
             if(this.state.currentMode != 1)
                 style.display = "none"
 
@@ -242,9 +262,10 @@ class StudyPage extends React.Component {
                 .filter(x => {return x.diagnosticProcedureID == result.diagnosticProcedureID})
  
                 const Aid = aidMap[result.diagnosticProcedureID].component
+
                 return <div style={style}>
                     {/*<Lung_RADS patient={this.state.patients[this.state.currentPatient]}/>}*/}
-                    <Aid patient={dummyPatients[0]} patientID={patientID} rawResults={rawResults}/>
+                    <Aid focusResult={this.focusResult} rawResults={rawResults}></Aid>{/* patient={dummyPatients[0]} patientID={patientID} rawResults={rawResults}/>*/}
                 </div>
             } else {
                 return null
@@ -489,6 +510,7 @@ const actionCreators = {
     getResponseList: ResponseActions.getResponseList,
     setProcedure: ResponseActions.setProcedure,
     getPatientList: StudyActions.getPatientList,
+    initStudy: StudyActions.initStudy,
 }
 
 const connectedStudyPage = connect(mapState, actionCreators)(StudyPage)

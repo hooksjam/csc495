@@ -1,7 +1,28 @@
 import React from "react"
 
+export const rotateResults = (results, field) => {
+    return Object.values(results.reduce((lol, obj) => {
+        var other = {}
+        for(var key in obj) {
+            if(key == field) continue
+            other[key] = obj[key]
+        }
+        for(let i = 0; i < obj[field].length; i++) {
+            if(!(i in lol))
+                lol[i] = []
+
+            var x = obj[field][i]
+            for(var key in other) {
+                x[key] = other[key]
+            }
+
+            lol[i].push(obj[field][i])
+        }
+        return lol
+    }, {}))
+}
+
 export const reduceResults = (form, results, reduction) => {
-    console.log("RESULTS", results)
     return results.map(x => {
         var result = Object.keys(reduction.meta).reduce((map, y) => {
             map[y] = x[reduction.meta[y]]
@@ -9,10 +30,8 @@ export const reduceResults = (form, results, reduction) => {
         },{})
 
         for(var key in reduction.fields) {
-            console.log("Getting answer", reduction.fields[key])
             var answer = x.getAnswerFn(reduction.fields[key])
             if(answer != null) {
-                console.log("ANSWER", answer)
                 if(answer.field != null)
                     result[key] = answer.stringValue
                 else if(answer.choices != null && answer.choices.length > 0) {
@@ -66,7 +85,7 @@ export const reduceResults = (form, results, reduction) => {
 }*/
 
 var evalComparator = (comparator, compare, value) => {
-    console.log('COMPARE', comparator, compare, value)
+    // console.log('COMPARE', comparator, compare, value)
     switch(comparator) {
         case "lt": return compare < value
         case "le": return compare <= value
@@ -86,7 +105,7 @@ var evalPred = (obj, test) => {
     var pred = obj[key]
     if(pred == true)
         return true
-    console.log("PRED", key)
+    // console.log("PRED", key)
     switch(key) {
         case "default":
             return pred
@@ -141,14 +160,12 @@ var evalPred = (obj, test) => {
             break
         }
         case "trend": {
-            console.log("TREND!", test)
             if(!Array.isArray(test)) {
                 return null
             }
 
             var current = evalPred(pred, test[0])
             if(current == null) {
-                console.log("TREND NULL", current)
                 return null
             }
 
@@ -157,8 +174,6 @@ var evalPred = (obj, test) => {
             if(test.length > 1)  {
                 prev = evalPred(pred, test[1])
             } else {
-                console.log("ASDFASDFADS", pred)
-
                 if('default' in pred)
                     prev = pred.default
                 else
@@ -200,14 +215,15 @@ var evalPred = (obj, test) => {
         }
         case "any": {
             // Split the results to group the nodules
-            var testB = Object.values(test.reduce((lol, obj) => {
+            var testB = rotateResults(test, pred.field)
+            /*var testB = Object.values(test.reduce((lol, obj) => {
                 for(let i = 0; i < obj[pred.field].length; i++) {
                     if(!(i in lol))
                         lol[i] = []
                     lol[i].push(obj[pred.field][i])
                 }
                 return lol
-            }, {}))
+            }, {}))*/
 
 
             var results = []
@@ -281,7 +297,7 @@ var evalPred = (obj, test) => {
         case "eq":
         case "gt": {
             var ret = evalPred(pred, test)
-            console.log(pred, "RET", ret)
+            // console.log(pred, "RET", ret)
             if(ret == null) {
                 return null
             }
@@ -309,9 +325,9 @@ export const getAnswers = (results, predicates) => {
     answers = {}
     for(var key in predicates) {
         var pred = predicates[key]
-        console.log("PREDICATE", key)
+        // console.log("PREDICATE", key)
         var ans = evalPred(pred, results)
-        console.log("\n")
+        // console.log("\n")
         answers[key] = ans
     }
     return answers

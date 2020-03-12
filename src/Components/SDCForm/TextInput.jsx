@@ -59,6 +59,8 @@ export class TextInput extends React.Component {
                         }
                     }
                 }
+            } else if(nextProps.response != null) {
+                return {value:"", responseID:nextProps.response._id}
             }
         }
         if(nextProps.response != null)

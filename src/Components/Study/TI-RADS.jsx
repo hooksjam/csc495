@@ -57,9 +57,9 @@ export class TI_RADS extends React.Component {
             return <div className="findings" key={ix}>
                 <h3> {key} </h3>
                 <h4> {x.subtitle} </h4>
-                {x.predicates.map(p => {
+                {x.predicates.map((p, ip) => {
                     var sat = this.satisfy(p)
-                    return <div className={`predicate ${sat?"satisfy":""}`}>
+                    return <div className={`predicate ${sat?"satisfy":""}`} key={ip}>
                         <span> {p.text} </span> 
                         <span style={{whiteSpace: "nowrap", marginLeft:"auto"}}> {p.points} {p.points==1?"point":"points"} </span>
                     </div>
