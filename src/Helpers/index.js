@@ -4,4 +4,5 @@ export * from './FakeBackend';
 export * from './RouterHistory';
 export * from './Store';
 export * from './RequestHandler';
+export * from './SynopticHelper';
 

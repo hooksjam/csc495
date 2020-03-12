@@ -60,6 +60,7 @@ export class MultiSection extends React.Component {
             }
             return {sectionCount: i, responseID:nextProps.response._id}
         }
+        return null
     }
 
     addSection() {

@@ -119,6 +119,7 @@ class StudyPage extends React.Component {
             collapseNav:true,
             showOptions:false,
             patients:[],
+            mode:1,
         }
 
         this.state.currentResult = this.state.patients.map(x => {
@@ -231,11 +232,19 @@ class StudyPage extends React.Component {
             if(this.state.currentMode != 1)
                 style.display = "none"
 
+
+
             if(result.diagnosticProcedureID && result.diagnosticProcedureID != "") {
+                var patientID = this.state.patients[this.state.currentPatient].id
+                var rawResults = this.props.response.results[patientID]
+                .filter(x => {return x in this.props.response.cache})
+                .map(x => {return this.props.response.cache[x]})
+                .filter(x => {return x.diagnosticProcedureID == result.diagnosticProcedureID})
+ 
                 const Aid = aidMap[result.diagnosticProcedureID].component
                 return <div style={style}>
                     {/*<Lung_RADS patient={this.state.patients[this.state.currentPatient]}/>}*/}
-                    <Aid patient={dummyPatients[0]} patientID={0}/>
+                    <Aid patient={dummyPatients[0]} patientID={patientID} rawResults={rawResults}/>
                 </div>
             } else {
                 return null

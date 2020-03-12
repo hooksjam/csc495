@@ -68,8 +68,10 @@ export class TextInput extends React.Component {
 
     onChange(e=null) {
         var value
+        console.log("CHANGE!", e.target.value, e.target.value == '')
         if(e != null) {
             value = e.target.value
+            console.log("Setting value to ", value)
             this.setState({value:value})
         } else {
             value = this.state.value
@@ -85,7 +87,7 @@ export class TextInput extends React.Component {
         var response = this.props.response
         this.saveTimeout = setTimeout(function() {
             this.saveTimeout = null
-            if (value === this.state.value){
+            if (value === this.state.value && value != ''){
                 var answer = {instance:instance}
                 if(choiceID) {
                     answer.choices= [{choiceID:choiceID, field: {stringValue:value}}]

@@ -10,7 +10,7 @@ var initResponse = (response) => {
         }, {})
         response.answers = []
     }
-    response.getAnswerFn = (nodeID, instance) => {
+    response.getAnswerFn = (nodeID, instance=0) => {
         var key = `${nodeID}_${instance}`
         return response.map[key]
     }
