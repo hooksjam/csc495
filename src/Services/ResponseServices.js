@@ -24,10 +24,16 @@ async function addResponse(formFillerID, patientID, diagnosticProcedureDI) {
     return responses.data
 }
 
-async function addAnswer(answer) {
+async function addAnswer(answer, options) {
     let responses = {}
     try {
-        responses = await Axios.post(`/api/response/answer`, {answer} )
+        var body = {
+            answer:answer
+        }
+        for(var key in options) {
+            body[key] = options[key]
+        }
+        responses = await Axios.post(`/api/response/answer`, body)
     } catch(e) {
         console.log(e)
         return {}

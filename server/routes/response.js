@@ -216,8 +216,9 @@ export default (passport) => {
 		if (req.body.answer == null) {
 			util.errorMessage(res, 'no answer provided')
 		}
+
 		var newAnswer = req.body.answer
-		console.log("NEW ANSWER", newAnswer)
+		console.log("NEW ANSWER", req.body)
 
 		// Update saved date
 		var timestamp = util.timestamp();

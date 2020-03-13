@@ -1,12 +1,12 @@
 import { ResponseConstants } from 'Constants'
 import { ResponseServices } from 'Services'
 
-function addAnswer(response, node, answer, instance=0) {
+function addAnswer(response, node, answer, options = {}) {
     answer.responseID = response._id
     answer.nodeID = node.referenceID
     return async (dispatch, getState) => {
         dispatch(request(node.referenceID))
-            await ResponseServices.addAnswer(answer)
+            await ResponseServices.addAnswer(answer, options)
                 .then(
                     x => dispatch(success(answer)),
                     error => dispatch(failure(error.toString()))

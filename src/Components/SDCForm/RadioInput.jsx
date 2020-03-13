@@ -55,7 +55,7 @@ export class RadioInput extends React.Component {
         var answer = {instance:this.props.instance}
         answer.choices = [{choiceID:e.target.id}]
         console.log("ANSWER", answer)
-        this.props.addAnswer(this.props.response, this.props.node, answer)
+        this.props.addAnswer(this.props.response, this.props.node, answer, {maxSelection:1})
         return null
         /*if (e.target.getAttribute("index") === undefined || e.target.getAttribute("index") == null) {
             console.log(e.target)

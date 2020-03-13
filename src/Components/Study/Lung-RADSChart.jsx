@@ -47,9 +47,11 @@ class Lung_RADSChart extends React.Component {
     			<div style={{"display":"flex", "flexDirection":"row", "justifyContent":"space-around"}}>
     				<div className="results">
 		    			{x.map((y, iy) => {
+		    				console.log("Y", y)
 		    				return <div className="result" key={iy} onClick={()=>{this.props.focusResult(y.responseID, 0)}}>
 		    					{Object.keys(y).filter(y => {return y != 'nodule_number'}).map(z => {
-		    						return (<React.Fragment><span> {z}: {y[z]}</span><br/></React.Fragment>)
+		    						// return null
+		    						return (<React.Fragment><span> {JSON.stringify(z)}: {JSON.stringify(y[z])}</span><br/></React.Fragment>)
 		    					})}
 		    				</div>	
 		    			})}

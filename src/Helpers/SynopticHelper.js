@@ -7,6 +7,7 @@ export const rotateResults = (results, field) => {
             if(key == field) continue
             other[key] = obj[key]
         }
+        // console.log("FIELD!", field, "OBJ", obj)
         for(let i = 0; i < obj[field].length; i++) {
             if(!(i in lol))
                 lol[i] = []
@@ -56,8 +57,16 @@ export const reduceResults = (form, results, reduction) => {
                         // Get answers for this module
                         var item = Object.keys(agg.fields).reduce((map, obj) => {
                             var answer = getProp(agg.fields[obj])
-                            if(answer)
-                                map[obj] = parseFloat(answer.field.stringValue)
+                            if(answer) {
+                                if(answer.field != null) {
+                                    if(/^[0-9\.]+$/.test(answer.field.stringValue))
+                                        map[obj] = parseFloat(answer.field.stringValue)
+                                    else
+                                        map[obj] = answer.field.stringValue
+                                } else if(answer.choices != null && answer.choices.length > 0) {
+                                    map[obj] = answer.choices[0]
+                                }
+                            }
                             return map
                         },{})
                         list.push(item)
@@ -144,6 +153,25 @@ var evalPred = (obj, test) => {
             else
                 return true
         }
+        case "choice": {
+            if(Array.isArray(pred)) {
+                var ret = pred.map(x => {
+                    if(x in test)
+                        return test[x].choiceID
+                    else
+                        return null
+                })
+                return ret
+            } else {
+                if(pred in test)
+                    return test[pred].choiceID
+                else
+                    return null
+            }
+
+            break 
+        }
+        case "get":
         case "field": {
             if(Array.isArray(pred)) {
                 var ret = pred.map(x => {
@@ -237,6 +265,7 @@ var evalPred = (obj, test) => {
 
                 // If val is true, keep list of nodules
                 if(val) {
+                    // console.log("VAL!", val)
                     results.push(testB[i])
                 }
             }

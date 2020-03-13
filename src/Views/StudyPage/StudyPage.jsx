@@ -251,7 +251,6 @@ class StudyPage extends React.Component {
             var style = {height:"100%", "display":"flex"}
             if(this.state.currentMode != 1) {
                 style.display = "none"
-                return null
             }
 
 
@@ -503,6 +502,7 @@ function mapState(state) {
     const { form, authentication, study, response } = state
     const { user } = authentication
 
+    console.log(response)
     return { user, form, patients:study.patients, response }
 }
   

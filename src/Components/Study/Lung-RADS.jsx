@@ -17,6 +17,7 @@ class Lung_RADS extends React.Component {
         if(nextProps.form && nextProps.rawResults) {
             nextProps.initStudy(nextProps.form, nextProps.rawResults, reduction, predicates)
         }
+        return null
     }
 
     render() {
