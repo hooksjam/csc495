@@ -60,6 +60,7 @@ export class Question extends React.Component {
                     node={node}
                     nested={true}
                     addAnswer={this.props.addAnswer}
+                    deleteAnswer={this.props.deleteAnswer}
                     getChildrenFn={this.props.getChildrenFn}
                     response={this.props.response}
                     helpers={this.props.helpers}
@@ -80,6 +81,7 @@ export class Question extends React.Component {
                     node={this.props.node} 
                     showID={this.props.showID} 
                     addAnswer={this.props.addAnswer} 
+                    deleteAnswer={this.props.deleteAnswer}
                     response={this.props.response} 
                     getChildrenFn={this.props.getChildrenFn}
                     instance={this.props.instance}
@@ -89,6 +91,7 @@ export class Question extends React.Component {
                     node={this.props.node} 
                     showID={this.props.showID} 
                     addAnswer={this.props.addAnswer} 
+                    deleteAnswer={this.props.deleteAnswer}
                     response={this.props.response} 
                     getChildrenFn={this.props.getChildrenFn}
                     instance={this.props.instance}
@@ -99,6 +102,7 @@ export class Question extends React.Component {
                 node={this.props.node} 
                 field={this.props.node.field} 
                 addAnswer={this.props.addAnswer} 
+                deleteAnswer={this.props.deleteAnswer}
                 response={this.props.response}
                 instance={this.props.instance}
                 />

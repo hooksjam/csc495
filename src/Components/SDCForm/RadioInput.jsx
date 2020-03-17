@@ -18,6 +18,7 @@ export class RadioInput extends React.Component {
             selectedChoice: undefined,
             showOnSelection: true,
             responseID:null,
+            selfUpdate:false,
         }
 
         this.onChange = this.onChange.bind(this)
@@ -26,10 +27,12 @@ export class RadioInput extends React.Component {
     }
 
 
-    static getDerivedStateFromProps(nextProps, prevState) {
-    }
 
     static getDerivedStateFromProps(nextProps, prevState) {
+        if(prevState.selfUpdate) {
+            return {selfUpdate:false}
+        }
+
         if(nextProps.response != null && nextProps.node != null && (prevState.selectedChoice == null || nextProps.response._id != prevState.responseID)) {
             var answer = nextProps.response.getAnswerFn(nextProps.node.referenceID, nextProps.instance)
             if(answer && answer.choices.length > 0) {
@@ -46,17 +49,17 @@ export class RadioInput extends React.Component {
 
     onChange(e) {
         if(this.state.selectedChoice == e.target.id) {
-            //this.setState({selectedChoice:null})
-            return
+            this.setState({selectedChoice:null, selfUpdate:true})
+            this.props.deleteAnswer(this.props.response, this.props.node, this.props.instance)
+            e.target.checked = false
         } else {
-            this.setState({selectedChoice:e.target.id})
+            this.setState({selectedChoice:e.target.id, selfUpdate:true})
+
+            var answer = {instance:this.props.instance}
+            answer.choices = [{choiceID:e.target.id}]
+            this.props.addAnswer(this.props.response, this.props.node, answer, {maxSelection:1})
         }
 
-        var answer = {instance:this.props.instance}
-        answer.choices = [{choiceID:e.target.id}]
-        console.log("ANSWER", answer)
-        this.props.addAnswer(this.props.response, this.props.node, answer, {maxSelection:1})
-        return null
         /*if (e.target.getAttribute("index") === undefined || e.target.getAttribute("index") == null) {
             console.log(e.target)
             alert("Something wrong")
@@ -117,6 +120,7 @@ export class RadioInput extends React.Component {
                     id={child.referenceID}
                     node={child}
                     addAnswer={this.props.addAnswer}
+                    deleteAnswer={this.props.deleteAnswer}
                     getChildrenFn={this.props.getChildrenFn}
                     response={this.props.response}
                     depth={this.props.depth}
@@ -133,6 +137,7 @@ export class RadioInput extends React.Component {
                 choiceID={choice.referenceID} 
                 field={choice.field} 
                 addAnswer={this.props.addAnswer} 
+                deleteAnswer={this.props.deleteAnswer}
                 response={this.props.response}
                 instance={this.props.instance}
                 disabled={this.state.selectedChoice != choice.referenceID}/>

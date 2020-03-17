@@ -41,6 +41,22 @@ async function addAnswer(answer, options) {
     return responses.data
 }
 
+async function deleteAnswer(responseID, nodeID, instance, choiceID=null) {
+    let responses = {}
+    try {
+        var query 
+        if(choiceID != null)
+            query = `/api/response/answer?responseID=${responseID}&nodeID=${nodeID}&instance=${instance}&choiceID=${choiceID}`
+        else
+            query = `/api/response/answer?responseID=${responseID}&nodeID=${nodeID}&instance=${instance}`
+        responses = await Axios.delete(query)
+    } catch(e) {
+        console.log(e)
+        return {}
+    }
+    return responses.data
+}
+
 async function setProcedure(responseID, diagnosticProcedureID) {
     let responses = {}
     try {
@@ -52,10 +68,22 @@ async function setProcedure(responseID, diagnosticProcedureID) {
     return responses.data
 }
 
+async function setDate(responseID, date) {
+    let responses = {}
+    try {
+        responses = await Axios.put(`/api/response/date`, {_id:responseID, date:date} )
+    } catch(e) {
+        console.log(e)
+        throw e
+    }
+    return responses.data
+}
 
 export const ResponseServices = {
     addAnswer,
+    deleteAnswer,
     addResponse,
     getResponseList,
     setProcedure,
+    setDate,
 }

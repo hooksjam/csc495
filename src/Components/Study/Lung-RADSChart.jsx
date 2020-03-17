@@ -41,6 +41,9 @@ class Lung_RADSChart extends React.Component {
     }
 
     getSummary() {
+    	var keys = ["date", "responseID", "solid", "partsolid", "partsolid-solid", "GGN"]
+		var propSet = new Set(keys)
+		console.log("Propset", propSet)
     	return this.state.summary.map((x,ix) => {
     		return <div className="nodule" key={ix}>
     			<h1> Nodule {x[0].nodule_number} </h1>
@@ -48,13 +51,19 @@ class Lung_RADSChart extends React.Component {
     				<div className="results">
 		    			{x.map((y, iy) => {
 		    				console.log("Y", y)
-		    				return <div className="result" key={iy} onClick={()=>{this.props.focusResult(y.responseID, 0)}}>
-		    					{Object.keys(y).filter(y => {return y != 'nodule_number'}).map(z => {
+		    				return <div className="result" key={iy} onClick={()=>{this.props.focusResult(y.responseID, 0, ix)}}>
+		    					{Object.keys(y)
+		    						.filter(y => {console.log("YW", y, propSet.has(y)); return propSet.has(y)})
+		    						.sort((a, b) => {
+		    							return keys.indexOf(a) - keys.indexOf(b)
+		    						})
+		    						.map(z => {
 		    						// return null
-		    						return (<React.Fragment><span> {JSON.stringify(z)}: {JSON.stringify(y[z])}</span><br/></React.Fragment>)
+		    						return (<React.Fragment><span> <b>{JSON.stringify(z).replace(/"/g,'')}</b>: {JSON.stringify(y[z]).replace(/"/g, '')}</span><br/></React.Fragment>)
 		    					})}
 		    				</div>	
 		    			})}
+		    			{/*Nodule properties*/}
 	    			</div>
 	    			<div className="graph">
 	    				<Lung_RADSGraph nodule_number={x[0].nodule_number}>

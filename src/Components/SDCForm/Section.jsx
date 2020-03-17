@@ -56,6 +56,7 @@ export class Section extends React.Component {
                     node={node}
                     nested={true}
                     addAnswer={this.props.addAnswer}
+                    deleteAnswer={this.props.deleteAnswer}
                     getChildrenFn={this.props.getChildrenFn}
                     response={this.props.response}
                     helpers={this.props.helpers}

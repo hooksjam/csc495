@@ -263,3 +263,14 @@
 	padding:0 50px;
 
 }
+
+.react-datepicker-wrapper {
+	input {
+		width:100%;
+	}
+}
+
+.react-datepicker {
+    transform: scale(1.5);
+    transform-origin: top;
+}

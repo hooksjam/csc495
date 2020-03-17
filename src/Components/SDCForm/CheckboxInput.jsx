@@ -18,6 +18,7 @@ export class CheckboxInput extends React.Component {
             checked: {},
             showOnSelection: true,
             responseID:null,
+            selfUpdate:false
         }
 
         this.onChange = this.onChange.bind(this)
@@ -28,6 +29,9 @@ export class CheckboxInput extends React.Component {
 
 
     static getDerivedStateFromProps(nextProps, prevState) {
+        if(prevState.selfUpdate)
+            return {selfUpdate:false}
+
         if(nextProps.response != null && nextProps.node != null && (Object.keys(prevState.checked).length == 0 || nextProps.response._id != prevState.responseID)) {
             var answer = nextProps.response.getAnswerFn(nextProps.node.referenceID, nextProps.instance)
             if(answer && answer.choices.length > 0) {
@@ -49,15 +53,20 @@ export class CheckboxInput extends React.Component {
     onChange(e) {
         var newState = {...this.state}
         var target = e.target
-        if(target.checked)
+        if(target.checked) {
             newState.checked[e.target.id] = 1
-        else if(e.target.id in newState.checked)
+            var answer = {instance:this.props.instance}
+            answer.choices = Object.keys(newState.checked).map(x => {return {choiceID:x}})
+            this.props.addAnswer(this.props.response, this.props.node, answer)
+            newState.selfUpdate = true
+            this.setState(newState)
+        }
+        else if(e.target.id in newState.checked) {
             delete newState.checked[e.target.id]
-        this.setState(newState)
-
-        var answer = {instance:this.props.instance}
-        answer.choices = Object.keys(newState.checked).map(x => {return {choiceID:x}})
-        this.props.addAnswer(this.props.response, this.props.node, answer)
+            newState.selfUpdate = true
+            this.setState(newState)
+            this.props.deleteAnswer(this.props.response, this.props.node, this.props.instance, e.target.id)
+        }
         return null
         /*if (e.target.getAttribute("index") === undefined || e.target.getAttribute("index") == null) {
             console.log(e.target)
@@ -118,6 +127,7 @@ export class CheckboxInput extends React.Component {
                     id={child.referenceID}
                     node={child}
                     addAnswer={this.props.addAnswer}
+                    deleteAnswer={this.props.deleteAnswer}
                     getChildrenFn={this.props.getChildrenFn}
                     response={this.props.response}
                     depth={this.props.depth}
@@ -134,6 +144,7 @@ export class CheckboxInput extends React.Component {
                 choiceID={choice.referenceID} 
                 field={choice.field} 
                 addAnswer={this.props.addAnswer} 
+                deleteAnswer={this.props.deleteAnswer}
                 response={this.props.response}
                 instance={this.props.instance}
                 disabled={!(choice.referenceID in this.state.checked)}/>

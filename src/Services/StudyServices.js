@@ -14,7 +14,8 @@ function initStudy(form, rawResults, reduction, predicates) {
     var results = reduceResults(form, rawResults, reduction)
     // Sort by date
     results = results.sort((a, b) => {
-        return b.createdAt.localeCompare(a.createdAt)//new Date(a.date) - new Date(b.date)
+        //return b.createdAt.localeCompare(a.createdAt)//
+        return new Date(b.date) - new Date(a.date)
     }) 
 
     var answers = getAnswers(results, predicates)

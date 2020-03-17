@@ -58,7 +58,10 @@ export class MultiSection extends React.Component {
                 if(!(key in nextProps.response.map))
                     break
             }
-            return {sectionCount: i, responseID:nextProps.response._id}
+            if(prevState.currentSection >= i)
+                return {sectionCount: i, currentSection: i-1, responseID:nextProps.response._id}
+            else
+                return {sectionCount: i, responseID:nextProps.response._id}
         }
         return null
     }
@@ -84,6 +87,7 @@ export class MultiSection extends React.Component {
         if(this.state.sectionCount > 0) {
             // this.state.sections.splice(this.state.currentSection, 1)
             this.setState({sectionCount:this.state.sectionCount-1, currentSection:Math.max(this.state.currentSection-1, 0), sections:this.state.sections})
+            this.props.deleteAnswer(this.props.response, this.props.node, this.state.sectionCount-1)
         }
     }
 
@@ -110,6 +114,7 @@ export class MultiSection extends React.Component {
                 sectionID={i}
                 node={this.props.node}
                 addAnswer={this.props.addAnswer}
+                deleteAnswer={this.props.deleteAnswer}
                 getChildrenFn={this.props.getChildrenFn}
                 response={this.props.response}
                 showID={this.state.showID}

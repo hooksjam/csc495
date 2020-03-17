@@ -46,7 +46,8 @@ class Lung_RADSGraph extends React.Component {
 
         // Sort by date
         data = data.sort((a, b) => {
-            return a.createdAt.localeCompare(b.createdAt)//new Date(a.date) - new Date(b.date)
+            //return new Date(b.date).localeCompare(b.createdAt)
+            return new Date(b.date) - new Date(a.date)
         }) 
 
         return {

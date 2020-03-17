@@ -10,6 +10,9 @@ import {
     Options,
  } from 'Components'
 
+import DatePicker from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+
 var screenChangeThreshold = 800
 
 const aidMap = {
@@ -146,6 +149,7 @@ class StudyPage extends React.Component {
         this.setProcedure = this.setProcedure.bind(this)
 
         this.focusResult = this.focusResult.bind(this)
+        this.changeDate = this.changeDate.bind(this)
     }
 
     async componentDidMount() {
@@ -167,6 +171,7 @@ class StudyPage extends React.Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
+        console.log("ASDFASDF")
         var newState = {}
         if(nextProps.patients.length != prevState.currentResult.length) {
             newState.currentResult = nextProps.patients.map(x => {return 0})
@@ -175,7 +180,9 @@ class StudyPage extends React.Component {
         for(let i = 0; i < nextProps.patients.length; i++) {
             var patient = JSON.parse(JSON.stringify(nextProps.patients[i]))
             if(patient.id in nextProps.response.results) {
-                patient.results = nextProps.response.results[patient.id].map(x => {return nextProps.response.cache[x]})
+                patient.results = nextProps.response.results[patient.id].map(x => {return nextProps.response.cache[x]}).sort((a, b) => {
+                    return new Date(b.date) - new Date(a.date)
+                })
             } else {
                 patient.results = []
             }
@@ -198,6 +205,7 @@ class StudyPage extends React.Component {
             console.log("Focus on result", match)
             var newState = {...this.state, currentMode:0}
             newState.currentResult[this.state.currentPatient] = match
+            // Clamp nodules
             this.setState(newState)
         }
     }
@@ -214,9 +222,7 @@ class StudyPage extends React.Component {
 
         var results = this.state.patients[this.state.currentPatient].results
         if(results && results.length > 0) {
-            return results.sort((a, b) => {
-                return b.createdAt.localeCompare(a.createdAt)
-            }).map((x, ix) => {
+            return results.map((x, ix) => {
                 return (<div 
                     key={`result_${ix}`}
                     className={`navItem ${ix == this.state.currentResult[this.state.currentPatient]?"selected":""}`}
@@ -253,8 +259,6 @@ class StudyPage extends React.Component {
                 style.display = "none"
             }
 
-
-
             if(result.diagnosticProcedureID && result.diagnosticProcedureID != "") {
                 var patientID = this.state.patients[this.state.currentPatient].id
                 var rawResults = this.props.response.results[patientID]
@@ -266,7 +270,7 @@ class StudyPage extends React.Component {
 
                 return <div style={style}>
                     {/*<Lung_RADS patient={this.state.patients[this.state.currentPatient]}/>}*/}
-                    <Aid focusResult={this.focusResult} rawResults={rawResults}></Aid>{/* patient={dummyPatients[0]} patientID={patientID} rawResults={rawResults}/>*/}
+                    <Aid active={this.state.currentMode == 1} focusResult={this.focusResult} rawResults={rawResults}></Aid>{/* patient={dummyPatients[0]} patientID={patientID} rawResults={rawResults}/>*/}
                 </div>
             } else {
                 return null
@@ -383,6 +387,20 @@ class StudyPage extends React.Component {
         this.props.history.push({pathname:`/test/`, state: {}})
     }
 
+    changeDate(date) {
+        var newState = {...this.state}
+        var res = newState.patients[newState.currentPatient].results[newState.currentResult[newState.currentPatient]] 
+        res.date = date.toLocaleDateString("en-US")
+        var newIndex = newState.patients[newState.currentPatient].results.sort((a, b) => {
+            return new Date(b.date) - new Date(a.date)
+        }).indexOf(res)
+
+        newState.currentResult[newState.currentPatient] = newIndex
+
+        this.setState({newState})
+        this.props.setDate(this.getCurrentResult()._id, date.toLocaleDateString("en-US"))
+    }
+
     render() {
         const columnWidth = this.state.smallScreen ? 12 : 4
 
@@ -464,8 +482,13 @@ class StudyPage extends React.Component {
                                             <div className="arrow fas fa-chevron-left"/>
                                         </div>
 
-                                        <div className="toolItem modeTitle disabled">
-                                            <span> {this.state.patients[this.state.currentPatient].results[this.state.currentResult[this.state.currentPatient]].date} </span>
+                                        <div className="toolItem modeTitle">
+                                            {/*(<span> {this.getCurrentResult().date} </span>*/}
+                                            <DatePicker
+                                                selected={new Date(this.getCurrentResult().date)}
+                                                onSelect={this.changeDate}
+                                                todayButton="today"
+                                                />
                                         </div>
 
                                         <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == this.state.patients[this.state.currentPatient].results.length - 1?"disabled":""}`} onClick={this.nextResult}>
@@ -502,7 +525,6 @@ function mapState(state) {
     const { form, authentication, study, response } = state
     const { user } = authentication
 
-    console.log(response)
     return { user, form, patients:study.patients, response }
 }
   
@@ -513,6 +535,7 @@ const actionCreators = {
     setProcedure: ResponseActions.setProcedure,
     getPatientList: StudyActions.getPatientList,
     initStudy: StudyActions.initStudy,
+    setDate: ResponseActions.setDate
 }
 
 const connectedStudyPage = connect(mapState, actionCreators)(StudyPage)

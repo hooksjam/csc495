@@ -37,6 +37,7 @@ export class Node extends React.Component {
                     key={this.props.id}
                     node={this.props.node}
                     addAnswer={this.props.addAnswer}
+                    deleteAnswer={this.props.deleteAnswer}
                     getChildrenFn={this.props.getChildrenFn}
                     response={this.props.response}
                     showID={this.state.showID}
@@ -52,6 +53,7 @@ export class Node extends React.Component {
         				key={this.props.id}
         				node={this.props.node}
                         addAnswer={this.props.addAnswer}
+                        deleteAnswer={this.props.deleteAnswer}
 	                    getChildrenFn={this.props.getChildrenFn}
 	                    response={this.props.response}
 	                    showID={this.state.showID}
@@ -67,6 +69,7 @@ export class Node extends React.Component {
 	                    key={this.props.id}
 	                    node={this.props.node}
                         addAnswer={this.props.addAnswer}
+                        deleteAnswer={this.props.deleteAnswer}
 	                    getChildrenFn={this.props.getChildrenFn}
 	                    response={this.props.response}
 	                    showID={this.state.showID}
@@ -83,6 +86,7 @@ export class Node extends React.Component {
                     key={this.props.id}
                     node={this.props.node}
                     addAnswer={this.props.addAnswer}
+                    deleteAnswer={this.props.deleteAnswer}
                     showID={this.state.showID}
                     depth={this.props.depth}
                     instance={this.props.instance}

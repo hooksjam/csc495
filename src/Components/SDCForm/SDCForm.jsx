@@ -76,6 +76,7 @@ class SDCForm extends React.Component {
             }, 1000)
         }
     }
+    
     getSections() {
         var helpers = {registerNode:this.registerNode}
         // console.log("HELPRS!", helpers)
@@ -87,6 +88,7 @@ class SDCForm extends React.Component {
                     node={node}
                     getChildrenFn={this.props.form.getChildrenFn}
                     addAnswer={this.props.addAnswer}
+                    deleteAnswer={this.props.deleteAnswer}
                     response={this.props.response}
                     helpers={helpers}
                     depth={0}
@@ -188,6 +190,7 @@ function mapState(state, ownProps) {
 const actionCreators = {
     getForm: FormActions.getForm,
     addAnswer: ResponseActions.addAnswer,
+    deleteAnswer: ResponseActions.deleteAnswer,
 }
 
 const connectedSDCFormPage = connect(mapState, actionCreators)(SDCForm)

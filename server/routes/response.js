@@ -139,6 +139,20 @@ export default (passport) => {
 			util.errorMessage(res, err, "updating diagnosticProcedureID")
 		})
 	})
+	router.put('/date', (req, res) => {
+		console.log("SET DATE", req.body.date)
+		if (req.body._id == null) {
+			util.errorMessage(res, "no id supplied");
+			return
+		}
+		SDCFormResponse.updateOne({_id:req.body._id}, {date:req.body.date})
+		.then(() => {
+			res.send(200)
+		})
+		.catch(err => {
+			util.errorMessage(res, err, "updating date")
+		})
+	})
 	router.put('/', (req, res) => {
 		// All the answers should already be in the form, at this point we just create a persistent link (if it doesn't exist)
 		if (req.body._id == null) {
@@ -304,6 +318,11 @@ export default (passport) => {
 			return
 		}
 
+		if(req.query.instance == null) {
+			util.errorMessage(res, "instance must be included")
+			return
+		}
+
 		// Deselect choice
 		var choiceID = null
 		if(req.query.choiceID != null) {
@@ -312,8 +331,9 @@ export default (passport) => {
 
 		var responseID = req.query.responseID
 		var nodeID = req.query.nodeID
+		var instance = req.query.instance
 
-		SDCFormAnswer.findOne({responseID: responseID, nodeID: nodeID}, (err, answer) => {
+		SDCFormAnswer.findOne({responseID: responseID, nodeID: nodeID, instance: instance}, (err, answer) => {
 			if(err)
 				util.errorMessage(res, err, "getting answer")
 			else if(answer) {
@@ -330,13 +350,15 @@ export default (passport) => {
 					deleteAnswer = (answer.choices.length == 0)
 				}
 				if(deleteAnswer) {
-					SDCFormAnswer.deleteOne({_id: answer._id}, (err) => {
-						if(err) {
-							util.errorMessage(res, err, 'deleting answer')
-						} else {
-							res.sendStatus(200)
-						}
+					SDCFormAnswer.deleteOne({_id: answer._id})
+					.then(x => {
+						res.sendStatus(200)
 					})
+					.catch(err => {
+						util.errorMessage(res, err, 'deleting answer')
+					})
+
+					// Delete dependencies
 				} else {
 					answer.save(err => {
 						if(err)

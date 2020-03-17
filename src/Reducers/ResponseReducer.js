@@ -61,13 +61,34 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
             newState.cache[action.responseID].diagnosticProcedureID = action.diagnosticProcedureID
             return newState
         }
+        case ResponseConstants.SET_DATE_SUCCESS: {
+            var newState = {...state}
+            newState.cache[action.responseID].date = action.date
+            return newState
+        }
         case ResponseConstants.ADD_ANSWER_SUCCESS: {
             // Update answer list and map
             var answer = action.answer
             var key = `${answer.nodeID}_${answer.instance}`
             var response = state.cache[answer.responseID]
             response.map[key] = answer
-            console.log("ANSWER SUCCESS")
+            return {...state}
+        }
+        case ResponseConstants.DELETE_ANSWER_SUCCESS: {
+            // Update answer list and map
+            var key = `${action.nodeID}_${action.instance}`
+            console.log("ACTIOn", action)
+            var response = state.cache[action.responseID]
+            if(key in response.map) {
+                if(action.choiceID) {
+                    response.map[key].choices = response.map[key].choices.filter(x => {
+                        return x.choiceID != action.choiceID
+                    })
+                } else {
+                    delete response.map[key]
+                }
+            }
+            console.log("DELETE SUCCESS")
             return {...state}
         }
         default:

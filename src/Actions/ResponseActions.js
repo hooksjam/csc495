@@ -18,6 +18,21 @@ function addAnswer(response, node, answer, options = {}) {
     function failure(error) { return { type: ResponseConstants.ADD_ANSWER_FAILURE, error } }
 }
 
+function deleteAnswer(response, node, instance, choiceID=null) {
+    return async (dispatch, getState) => {
+        dispatch(request(node.referenceID))
+            await ResponseServices.deleteAnswer(response._id, node.referenceID, instance, choiceID)
+                .then(
+                    x => dispatch(success(response._id, node.referenceID, instance, choiceID)),
+                    error => dispatch(failure(error.toString()))
+                )
+    }
+
+    function request(x) {return { type: ResponseConstants.DELETE_ANSWER_REQUEST, x } }
+    function success(responseID, nodeID, instance, choiceID) { return { type: ResponseConstants.DELETE_ANSWER_SUCCESS, responseID, nodeID, instance, choiceID } }
+    function failure(error) { return { type: ResponseConstants.DELETE_ANSWER_FAILURE, error } }
+}
+
 function addResponse(formFillerID, patientID, diagnosticProcedureID="") {
     return async (dispatch, getState) => {
         dispatch(request(patientID))
@@ -68,9 +83,26 @@ function setProcedure(responseID, diagnosticProcedureID) {
     function failure(error) { return { type: ResponseConstants.SET_PROCEDURE_FAILURE, error } }
 }
 
+function setDate(responseID, date) {
+    return async (dispatch, getState) => {
+        dispatch(request(responseID, date))
+            await ResponseServices.setDate(responseID, date)
+                .then(
+                    resp => dispatch(success(responseID, date)),
+                    error => dispatch(failure(error.toString()))
+                )
+    }
+
+    function request(responseID, date) {return { type: ResponseConstants.SET_DATE_REQUEST, responseID, date } }
+    function success(responseID, date) { return { type: ResponseConstants.SET_DATE_SUCCESS, responseID, date } }
+    function failure(error) { return { type: ResponseConstants.SET_DATE_FAILURE, error } }
+}
+
 export const ResponseActions = {
     addAnswer,
+    deleteAnswer,
     addResponse,
     getResponseList,
-    setProcedure
+    setProcedure,
+    setDate
 }

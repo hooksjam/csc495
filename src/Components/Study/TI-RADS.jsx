@@ -9,15 +9,15 @@ class TI_RADS extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
+            active:false
         }
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        if(nextProps.form && nextProps.rawResults) {
-            console.log(nextProps.form, nextProps.rawResults)
+        if(nextProps.form && nextProps.rawResults && nextProps.active && !prevState.active) {
             nextProps.initStudy(nextProps.form, nextProps.rawResults, reduction, predicates)
         }
-        return null
+        return {active:nextProps.active}
     }
 
     render() {
