@@ -1,7 +1,28 @@
 import React from "react"
 
+export const getNames = (form) => {
+    console.log("FORM!!", form)
+    var ret = {names:{}, ordering:{}}
+
+    var k = -1;
+    for(let i = 0; i < form.nodes.length; i++) {
+        k++
+        var node = form.nodes[i]
+        ret.names[node.referenceID] = node.title
+        ret.ordering[node.referenceID] = k
+        if(node.choices != null) {
+            for(let j = 0; j < node.choices.length; j++) {
+                k++
+                ret.names[node.choices[j].referenceID] = node.choices[j].title
+                ret.ordering[node.choices[j].referenceID] = k
+            }
+        }
+    }
+    return ret
+}
+
 export const rotateResults = (results, field) => {
-    return Object.values(results.reduce((lol, obj) => {
+    var ret = Object.values(results.reduce((lol, obj) => {
         var other = {}
         for(var key in obj) {
             if(key == field) continue
@@ -12,19 +33,22 @@ export const rotateResults = (results, field) => {
             if(!(i in lol))
                 lol[i] = []
 
-            var x = obj[field][i]
-            for(var key in other) {
-                x[key] = other[key]
-            }
+            if(obj[field][i]) {
+                var x = JSON.parse(JSON.stringify(obj[field][i]))
+                for(var key in other) {
+                    x[key] = other[key]
+                }
 
-            lol[i].push(obj[field][i])
+                lol[i].push(x)
+            }
         }
         return lol
     }, {}))
+    return ret
 }
 
 export const reduceResults = (form, results, reduction) => {
-    return results.map(x => {
+    var ret = results.map(x => {
         var result = Object.keys(reduction.meta).reduce((map, y) => {
             map[y] = x[reduction.meta[y]]
             return map
@@ -36,10 +60,30 @@ export const reduceResults = (form, results, reduction) => {
                 if(answer.field != null)
                     result[key] = answer.stringValue
                 else if(answer.choices != null && answer.choices.length > 0) {
-                    result[key] = answer.choices[0].choiceID
+                    var q = form.getChildrenFn(answer.nodeID)
+                    if(q.maxSelections == 1) {
+                        if(answer.choices[0].field == null)
+                            result[key] = answer.choices[0].choiceID
+                        else
+                            result[key] = answer.choices[0]
+                    } else {
+                        if(answer.choices[0].field == null) {
+                            result[key] = answer.choices.map(x => {return x.choiceID})
+                        } else {
+                            result[key] = answer.choices.map(x => {
+                                // Get actual question name
+                                //var choice = q.choices.filter(y => x.choiceID = y.referenceID)[0].title
+                                var ret = {}
+                                //ret[choice] = x.field[Object.keys(x.field)[0]]
+                                ret[x.choiceID] = x.field[Object.keys(x.field)[0]]
+                                return ret
+                           })
+                        }
+                    }
                 }
             }
         }
+
         for(var key in reduction.agg) {
             var agg = reduction.agg[key]
             if(agg.operator == "list") {
@@ -64,7 +108,29 @@ export const reduceResults = (form, results, reduction) => {
                                     else
                                         map[obj] = answer.field.stringValue
                                 } else if(answer.choices != null && answer.choices.length > 0) {
-                                    map[obj] = answer.choices[0]
+                                    var q = form.getChildrenFn(answer.nodeID)
+                                    if(q.maxSelections == 1) {
+                                        if(answer.choices[0].field == null)
+                                            map[obj] = answer.choices[0].choiceID
+                                        else
+                                            map[obj] = answer.choices[0]
+                                    } else {
+                                        if(answer.choices[0].field == null) {
+                                            map[obj] = answer.choices.map(x => {return x.choiceID})
+                                        } else {
+                                            map[obj] = answer.choices.map(x => {
+                                                // Get actual question name
+                                                //var choice = q.choices.filter(y => x.choiceID == y.referenceID)[0].title
+                                                var ret = {}
+                                                if(/^[0-9\.]+$/.test(x.field.stringValue))
+                                                    ret[x.choiceID] = parseFloat(x.field.stringValue)
+                                                else
+                                                    ret[x.choiceID] = x.field.stringValue
+                                                //ret[choice] = x.field[Object.keys(x.field)[0]]
+                                                return ret
+                                           })
+                                        }
+                                    }
                                 }
                             }
                             return map
@@ -79,6 +145,7 @@ export const reduceResults = (form, results, reduction) => {
         }
         return result
     })
+    return ret
 }
 
 

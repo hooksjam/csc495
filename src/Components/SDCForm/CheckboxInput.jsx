@@ -57,7 +57,7 @@ export class CheckboxInput extends React.Component {
             newState.checked[e.target.id] = 1
             var answer = {instance:this.props.instance}
             answer.choices = Object.keys(newState.checked).map(x => {return {choiceID:x}})
-            this.props.addAnswer(this.props.response, this.props.node, answer)
+            this.props.addAnswer(this.props.response, this.props.node, answer, {maxSelections:0})
             newState.selfUpdate = true
             this.setState(newState)
         }
@@ -143,6 +143,7 @@ export class CheckboxInput extends React.Component {
                 node={this.props.node} 
                 choiceID={choice.referenceID} 
                 field={choice.field} 
+                options={{maxSelections:0}}
                 addAnswer={this.props.addAnswer} 
                 deleteAnswer={this.props.deleteAnswer}
                 response={this.props.response}

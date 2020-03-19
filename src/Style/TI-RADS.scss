@@ -142,3 +142,29 @@
 		}
 	}
 }
+
+.results {
+	table {
+
+	}
+
+	thead {
+		background-color:#aaa;
+
+	}
+
+	.mainRow {
+		cursor:pointer;
+		&:hover {
+			background-color:#ccc;
+		}
+	}
+
+	tr, td, th {
+		padding:5px;
+	}
+
+	th, td, .mainRow {
+		border: 1px solid #444;
+	}
+}

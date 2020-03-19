@@ -136,6 +136,7 @@ export class RadioInput extends React.Component {
                 node={this.props.node}
                 choiceID={choice.referenceID} 
                 field={choice.field} 
+                options={{maxSelections:1}}
                 addAnswer={this.props.addAnswer} 
                 deleteAnswer={this.props.deleteAnswer}
                 response={this.props.response}

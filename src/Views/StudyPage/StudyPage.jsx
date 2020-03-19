@@ -171,7 +171,6 @@ class StudyPage extends React.Component {
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        console.log("ASDFASDF")
         var newState = {}
         if(nextProps.patients.length != prevState.currentResult.length) {
             newState.currentResult = nextProps.patients.map(x => {return 0})
@@ -476,7 +475,7 @@ class StudyPage extends React.Component {
                                         </div>
                                     </div>
 
-                                    {this.state.patients[this.state.currentPatient].results.length > 0 && 
+                                    {this.state.currentMode == 0 && this.state.patients[this.state.currentPatient].results.length > 0 &&
                                     <div className="toolGroup">
                                         <div className={`toolItem ${this.state.currentResult[this.state.currentPatient] == 0?"disabled":""}`} onClick={this.prevResult}>
                                             <div className="arrow fas fa-chevron-left"/>
@@ -497,11 +496,12 @@ class StudyPage extends React.Component {
 
                                     </div>}
 
+                                    {this.state.currentMode == 0 && 
                                     <div className="toolGroup">
                                         <div className="toolItem" onClick={this.addResult}>
                                             <div className="fas fa-plus"/>
                                         </div>  
-                                    </div>
+                                    </div>}
                                 </React.Fragment>
                             }
                         </React.Fragment>}

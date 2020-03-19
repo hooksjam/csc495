@@ -13,6 +13,8 @@ export function study(state = {patients:[], answers:[], results: [], focusItems:
         		...state,
         		results:action.results,
         		answers:action.answers,
+                names:action.names,
+                ordering:action.ordering,
         	}
         	return newState
         }

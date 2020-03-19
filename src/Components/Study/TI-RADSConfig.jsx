@@ -7,19 +7,23 @@ export const reduction = {
         "responseID": "_id",
     },
     "fields": {
-        "category": 'Q_78017_78017.100004300'
+        "right_lobe": 'Q_77989_77989.100004300',
+        'left_lobe': 'Q_77997_77997.100004300',
     },
     "agg": {
         "nodules": {
             "operator": "list",
             "sectionID": "S_dmk1_78013.100004300",
             "fields": {
+                'location': 'Q_78018_78018.100004300',
+                'size': 'Q_78033_78033.100004300',
                 'nodule_number': 'Q_78013_78013.100004300',
                 'composition': 'Q_78020_78020.100004300',
                 'echogenicity': 'Q_78021_78021.100004300',
                 'shape': 'Q_78022_78022.100004300',
                 'margin': 'Q_78023_78023.100004300',
                 'echogenicfoci': 'Q_78014_78014.100004300',
+                "category": 'Q_78017_78017.100004300',
             }
         }
     }
@@ -28,7 +32,6 @@ export const reduction = {
 export const values = {
 
 }
-
 export const predicates = {
 
     "composition-0": {

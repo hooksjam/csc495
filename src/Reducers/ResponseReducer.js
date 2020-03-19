@@ -71,15 +71,32 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
             var answer = action.answer
             var key = `${answer.nodeID}_${answer.instance}`
             var response = state.cache[answer.responseID]
-            response.map[key] = answer
+            console.log("ADD ANSWER", answer, action.options)
+            if(answer.choices != null && answer.choices.length > 0 && 'maxSelections' in action.options && action.options.maxSelections == 0 && key in response.map) {
+                console.log("DERP")
+                // Add to existing answer
+                var existing = response.map[key]
+                var choice = answer.choices[0]
+                var index = existing.choices.findIndex(x => {return x.choiceID == choice.choiceID})
+                if(index != -1) {
+                    if(choice.field != null)
+                        existing.choices[index] = choice
+                } else {
+                    existing.choices.push(choice)
+                }
+            } else {
+                console.log("LERP")
+                response.map[key] = answer
+            }
+            console.log("AFTER ADD", response.map[key])
             return {...state}
         }
         case ResponseConstants.DELETE_ANSWER_SUCCESS: {
             // Update answer list and map
             var key = `${action.nodeID}_${action.instance}`
-            console.log("ACTIOn", action)
             var response = state.cache[action.responseID]
             if(key in response.map) {
+                console.log("DELETE CHOICE!", action.choiceID)
                 if(action.choiceID) {
                     response.map[key].choices = response.map[key].choices.filter(x => {
                         return x.choiceID != action.choiceID
@@ -87,8 +104,8 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
                 } else {
                     delete response.map[key]
                 }
+                console.log("AFTER DELETE", response.map[key])
             }
-            console.log("DELETE SUCCESS")
             return {...state}
         }
         default:

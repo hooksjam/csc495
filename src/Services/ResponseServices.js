@@ -9,7 +9,6 @@ async function getResponseList(formFillerID, patient) {
         console.log(e)
         return responses
     }
-
     return responses.data
 }
 

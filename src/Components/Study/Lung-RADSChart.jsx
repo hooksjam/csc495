@@ -50,10 +50,9 @@ class Lung_RADSChart extends React.Component {
     			<div style={{"display":"flex", "flexDirection":"row", "justifyContent":"space-around"}}>
     				<div className="results">
 		    			{x.map((y, iy) => {
-		    				console.log("Y", y)
 		    				return <div className="result" key={iy} onClick={()=>{this.props.focusResult(y.responseID, 0, ix)}}>
 		    					{Object.keys(y)
-		    						.filter(y => {console.log("YW", y, propSet.has(y)); return propSet.has(y)})
+		    						.filter(y => {return propSet.has(y)})
 		    						.sort((a, b) => {
 		    							return keys.indexOf(a) - keys.indexOf(b)
 		    						})

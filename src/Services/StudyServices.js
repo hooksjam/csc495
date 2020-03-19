@@ -1,7 +1,7 @@
 ///* globals Promise */
 
 //import {authHeader, Axios, getApiUrl} from 'Helpers';
-import { reduceResults, getAnswers } from 'Helpers'
+import { reduceResults, getAnswers, getNames } from 'Helpers'
 
 async function getPatientList(username) {
     const patients = [{id:0, name:'John Doe'}, {id: 1, name:'Jane Doe'}]
@@ -19,12 +19,15 @@ function initStudy(form, rawResults, reduction, predicates) {
     }) 
 
     var answers = getAnswers(results, predicates)
+    var { names, ordering } = getNames(form)
 
     console.log("RESULTS!", results)
     console.log("ANSWERS", answers)
     return {
     	results:results,
     	answers:answers,
+        names:names,
+        ordering:ordering,
     }
 }
 

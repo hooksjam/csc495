@@ -2,6 +2,8 @@ import React from "react"
 import { connect } from 'react-redux'
 // import { TI_RADSGraph, TI_RADSRow } from 'Components'
 // import { rotateResults } from 'Helpers'
+import { RADSGraph } from 'Components'
+import { rotateResults } from 'Helpers'
 import { findings, scores } from './TI-RADSConfig.jsx'
 
 
@@ -35,6 +37,15 @@ var scoreColors = [
     }
 ]
 
+var parseVal = (v) => {
+    if(!v)
+        return null
+    var v = JSON.stringify(v).replace(/"/g, '')
+    if(/^[0-9\.]+$/.test(v))
+        v = parseFloat(v)
+    return v
+}
+
 var total = 0
 class TI_RADSChart extends React.Component {
 	constructor(props) {
@@ -50,11 +61,13 @@ class TI_RADSChart extends React.Component {
         this.getNoduleNum = this.getNoduleNum.bind(this)
         this.prevNodule = this.prevNodule.bind(this)
         this.nextNodule = this.nextNodule.bind(this)
+        this.getSummary = this.getSummary.bind(this)
 	}
 
     static getDerivedStateFromProps(nextProps, prevState) {
     	if(nextProps.results != null && nextProps.results.length > 0) {
-            return {num_nodules: nextProps.results[0].nodules.length}
+            var summary = rotateResults(nextProps.results, "nodules")
+            return {num_nodules: nextProps.results[0].nodules.length, summary:summary}
 	    } else {
 	    	return null
 	    }
@@ -192,13 +205,254 @@ class TI_RADSChart extends React.Component {
         })
     } 
 
+    getSummary() {
+        if(this.state.summary == null)
+            return null
+
+
+
+        var getPropDiv = (obj, key, index) => {
+            var name = JSON.stringify(key).replace(/"/g,'')
+            if(!Array.isArray(obj[key])) {
+                var val = parseVal(obj[key])
+                if(!val)
+                    return null
+                if(val in this.props.names)
+                    val = this.props.names[val]
+                var name = JSON.stringify(key).replace(/"/g,'')
+                return (<React.Fragment key={index}><span> <b>{name}</b>: {val}</span><br/></React.Fragment>)
+            } else {
+                return (<React.Fragment key={index}>
+                    <span> <b>{name}</b></span><br/>
+                    {obj[key]
+                        .sort((a, b) => {
+                            var aval = Object.keys(a)[0]
+                            var bval = Object.keys(b)[0]
+                            return this.props.ordering && this.props.ordering[aval] - this.props.ordering[bval]
+                        })
+                        .map(v => {
+                        var keyB = Object.keys(v)[0]
+                        var val = parseVal(v[keyB])
+                        if(!val)
+                            return null
+                        return (<React.Fragment><span>&nbsp;&nbsp;&nbsp;&nbsp;{this.props.names[keyB]}: {val}</span><br/></React.Fragment>)
+                    })}
+                </React.Fragment>)
+            } 
+        }
+
+        var thyroid = {
+            "date":0, 
+            "right_lobe": ["LI_77991_77991.100004300","LI_77992_77992.100004300","LI_77993_77993.100004300"], 
+            "left_lobe": ["LI_78001_78001.100004300","LI_77999_77999.100004300","LI_78000_78000.100004300"]}
+        /*var thyroidSet = new Set(keysThyroid)
+        var thyroid = this.props.results.map(x => {
+            return Object.keys(x)
+            .filter(y => {return thyroidSet.has(y)})
+            .map(z => {
+                var ret = {}
+                ret[z] = x[z]
+                return ret
+            })
+        })*/
+        // TODO: Add overall rightlobe/leftlobe
+        var nodules = {
+            "date":0, 
+            //"location":0, 
+            "size": ["LI_78034_78034.100004300","LI_78035_78035.100004300","LI_78039_78039.100004300","LI_78040_78040.100004300"],
+            "composition":0, 
+            "echogenicity":0, 
+            "shape":0, 
+            "margin":0, 
+            "echogenicfoci":0, 
+            "category":0
+        }
+
+        var overrides = {
+            'LI_78046_78046.100004300':'cystic/almost completely cystic',
+            'LI_78047_78047.100004300':'spongiform',
+            'LI_78048_78048.100004300':'mixed cystic and solid',
+            'LI_78044_78044.100004300':'solid/almost completely solid',
+            'LI_78045_78045.100004300':'shadowing calcifications prevent assessment',
+            'LI_78049_78049.100004300':'anechoic',
+            'LI_78050_78050.100004300':'iso/hyperechoic',
+            'LI_78051_78051.100004300':'hypoechoic',
+            'LI_78052_78052.100004300':'very hypoechoic',
+            'LI_78053_78053.100004300':'cannot be determined',
+            'LI_78054_78054.100004300':'wider than tall or round',
+            'LI_78055_78055.100004300':'tall than wide',
+            'LI_78056_78056.100004300':'smooth',
+            'LI_78057_78057.100004300':'ill-defined',
+            'LI_78058_78058.100004300':'lobulated/irregular',
+            'LI_78059_78059.100004300':'extra-thyroidal extension',
+            'LI_78060_78060.100004300':'border not seen clearly',
+            'LI_78061_78061.100004300':'none',
+            'LI_78062_78062.100004300':'large comet-tail artifacts',
+            'LI_78063_78063.100004300':'macrocalcifications',
+            'LI_78064_78064.100004300':'peripherial calcifications',
+            'LI_78065_78065.100004300':'punctate echogenic foci',
+            'LI_77991_77991.100004300':'length',
+            'LI_77992_77992.100004300':'width',
+            'LI_77993_77993.100004300':'height',
+            'LI_78001_78001.100004300':'length',
+            'LI_77999_77999.100004300':'width',
+            'LI_78000_78000.100004300':'height',
+            'LI_78034_78034.100004300':'length',
+            'LI_78035_78035.100004300':'width',
+            'LI_78039_78039.100004300':'height',
+            'LI_78040_78040.100004300':'volume',
+        }
+
+        var getName = (name) => {
+            if(name in overrides) {
+                return overrides[name]
+            } else if(name in this.props.names) {
+                return this.props.names[name]
+            } else {
+                return name
+            }
+        }
+
+        var getTable = (map, data) => {
+            var keys
+            var values
+            if(Array.isArray(map)) {
+                keys = map
+                values = map.reduce((vals, obj) => {
+                    if(obj == Object(obj))
+                        vals[obj] = Object.values(obj)[1]
+                    else
+                        vals[obj] = null
+                    return vals
+                }, {})
+            } else {
+                keys = Object.keys(map)
+                values = map
+            }
+            return (<table>
+                <thead>
+                    {keys.reduce((arr, key) => {
+                        var val = values[key]
+                        if(!Array.isArray(val)) {
+                            arr.push(<th>{key}</th>)
+                        } else {
+                            arr.push.apply(arr, val.map(keyB => {
+                                var name = getName(keyB)
+                                return <th><tr>{key}</tr><tr>{name}</tr></th>
+                            }))
+                        }
+                        return arr
+                    }, [])}
+                </thead>
+                {data.map(result => {
+                    return <tr className="mainRow" onClick={()=>{this.props.focusResult(result.responseID, 0, null)}}>
+                        {keys.map(x => {
+                            if(x in result) {
+                                var val = values[x]
+                                if(Array.isArray(val)) {
+                                    return val.map(key => {
+                                        // Inefficient, but must look through array each time
+                                        var find = result[x].find(f => {return Object.keys(f)[0] == key})
+                                        if(!find)
+                                            return <td></td>
+                                        var valB = Object.values(find)[0]
+                                        var name = getName(key)
+                                        return <td>{valB}</td>
+                                    })
+                                } else {
+                                    val = result[x]
+                                    val = getName(val)
+                                    return <td>{val}</td>
+                                }
+                            } else {
+                                return <td></td>
+                            }
+                        })}
+                    </tr>
+
+                })}
+            </table>)
+        }
+
+
+        var flatResults = this.props.results.map(result => {
+            return Object.keys(result).reduce((map, obj) => {
+                if(obj in thyroid) {
+                    var val = thyroid[obj]
+                    if(Array.isArray(val)) {
+                        for(let i = 0; i < val.length; i++) {
+                            var key = val[i]
+                            var find = result[obj].find(z => {return Object.keys(z)[0] == key})
+                            var valB = Object.values(find)[0]
+                            var name = getName(key)
+                            map[`${getName(obj)}_${name}`] = parseVal(valB)
+                        }
+                    } else {
+                        map[getName(obj)] = parseVal(result[obj])
+                    }
+
+                }
+                return map
+            }, {})
+        })
+        console.log("FLAT RESULTS!", flatResults)
+
+
+        console.log("SUM", this.state.summary)
+        /*var flatNodules = this.props.results.map(result => {
+            return Object.keys(result).reduce((map, obj) => {
+                if(obj in thyroid) {
+                    var val = thyroid[obj]
+                    if(Array.isArray(val)) {
+                        for(let i = 0; i < val.length; i++) {
+                            var key = val[i]
+                            var find = result[obj].find(z => {return Object.keys(z)[0] == key})
+                            var valB = Object.values(find)[0]
+                            var name = getName(key)
+                            map[`${getName(obj)}_${name}`] = parseVal(valB)
+                        }
+                    } else {
+                        map[getName(obj)] = parseVal(result[obj])
+                    }
+
+                }
+                return map
+            }, {})
+        })*/
+
+
+        return (<React.Fragment>
+            <div className="nodule" key="thyroid">
+                    <h1> Thyroid </h1>
+                    <div style={{"display":"flex", "flexDirection":"row", "justifyContent":"space-around"}}>
+                        <div className="results">
+                            {getTable(thyroid, this.props.results)}
+                        </div>
+                        {<RADSGraph data={flatResults}></RADSGraph>}
+                    </div>
+            </div>
+            {this.state.summary.map((x,ix) => {
+                return <div className="nodule" key={ix}>
+                    <h1> Nodule {x[0].nodule_number} </h1>
+                    <div style={{"display":"flex", "flexDirection":"row", "justifyContent":"space-around"}}>
+                        <div className="results">
+                            {getTable(nodules, x)}
+                        </div>
+                    </div>
+                </div>
+            })}
+        </React.Fragment>)
+
+    }
+
 	render() {
 		// Loading
 		if(this.props.answers == null || this.props.results == null)
 			return null
 
 		return (
-			  <div className="studyAid TI-RADS">
+            <React.Fragment>
+			<div className="studyAid TI-RADS">
                 <h1> ACR TI-RADS </h1>
 
                 <div className="toolGroup noduleSelect">
@@ -263,7 +517,11 @@ class TI_RADSChart extends React.Component {
                 <div>
                     <span>*Refer to discussion of papillary microcarcinomas for 5-9mm TR5 nodules.</span>
                 </div>
+                <div className="summary">
+                    {this.getSummary()}
+                </div>
             </div>
+            </React.Fragment>
         )
 	}
 }
@@ -271,7 +529,7 @@ class TI_RADSChart extends React.Component {
 function mapState(state) {
     const {  study } = state
 
-    return { results:study.results, answers:study.answers }
+    return { results:study.results, answers:study.answers, names:study.names, ordering:study.ordering }
 }
   
 const actionCreators = {

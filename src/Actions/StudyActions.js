@@ -26,14 +26,14 @@ function initStudy(form, rawResults, reduction, predicates) {
     return dispatch => {
         //dispatch(request())
         var x = StudyServices.initStudy(form, rawResults, reduction, predicates)
-        dispatch(success(x.results, x.answers))
+        dispatch(success(x.results, x.answers, x.names, x.ordering))
         /*error => {
             dispatch(failure(error.toString))
         })*/
     };
 
     function request() { return { type: StudyConstants.INIT_REQUEST } }
-    function success(results, answers) { return { type: StudyConstants.INIT_SUCCESS, results, answers } }
+    function success(results, answers, names, ordering) { return { type: StudyConstants.INIT_SUCCESS, results, answers, names, ordering } }
     function failure(error) { return { type: StudyConstants.INIT_FAILURE, error } } 
 }
 

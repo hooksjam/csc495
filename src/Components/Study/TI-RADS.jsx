@@ -22,7 +22,7 @@ class TI_RADS extends React.Component {
 
     render() {
         return (
-            <TI_RADSChart>
+            <TI_RADSChart focusResult = {this.props.focusResult}>
             </TI_RADSChart>
         )
     }

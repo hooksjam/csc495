@@ -97,7 +97,7 @@ export class TextInput extends React.Component {
                     answer.field= {stringValue:value}
                 }
 
-                this.props.addAnswer(response, node, answer)
+                this.props.addAnswer(response, node, answer, this.props.options)
             }
         }.bind(this), 500)
         return 
