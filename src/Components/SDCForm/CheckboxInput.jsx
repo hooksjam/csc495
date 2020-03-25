@@ -43,6 +43,11 @@ export class CheckboxInput extends React.Component {
                     checked:checked,
                     responseID: nextProps.response._id
                 }
+            } else {
+                if(nextProps.response != null)
+                    return {checked:{}, responseID:nextProps.response._id}
+                else
+                    return {selectedChoice:{}, responseID:null}
             }
         }
         if(nextProps.response != null)
@@ -53,6 +58,7 @@ export class CheckboxInput extends React.Component {
     onChange(e) {
         var newState = {...this.state}
         var target = e.target
+        console.log("BEFORE CHANGE", JSON.stringify(newState))
         if(target.checked) {
             newState.checked[e.target.id] = 1
             var answer = {instance:this.props.instance}
@@ -67,6 +73,7 @@ export class CheckboxInput extends React.Component {
             this.setState(newState)
             this.props.deleteAnswer(this.props.response, this.props.node, this.props.instance, e.target.id)
         }
+        console.log("AFTER CHANGE", JSON.stringify(newState))
         return null
         /*if (e.target.getAttribute("index") === undefined || e.target.getAttribute("index") == null) {
             console.log(e.target)
@@ -164,8 +171,8 @@ export class CheckboxInput extends React.Component {
                         id={x.referenceID} 
                         name={this.props.node.referenceID} 
                         value={x.referenceID} 
-                        defaultChecked={x.referenceID in this.state.checked} 
-                        onClick={this.onChange}></input>
+                        checked={x.referenceID in this.state.checked} 
+                        onChange={this.onChange}></input>
                     <div className="optionLabel"> {x.title} </div>
                     {this.getField(x)}
                     {this.props.showID && <div className="identifier"><span>{x.referenceID}</span></div>}

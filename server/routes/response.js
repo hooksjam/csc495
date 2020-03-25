@@ -9,6 +9,7 @@ import SDCFormAnswer from '../models/SDCFormAnswer'
 import SDCPersistentLink from '../models/SDCPersistentLink'
 import SDCQueryableAnswer from '../models/SDCQueryableAnswer'
 
+var formCache = {}
 
 export default (passport) => {
 	var router = express.Router()
@@ -248,9 +249,11 @@ export default (passport) => {
 				answer.instance = newAnswer.instance
 			} 
 
+			var prevChoices = []
 			if(newAnswer.field != null) {
 				answer.field = newAnswer.field
 			} else if(newAnswer.choices != null) {
+				var lostChoices = []
 				var newChoices = newAnswer.choices
 				var maxSelection = 0
 				if('maxSelection' in req.body)
@@ -260,8 +263,11 @@ export default (passport) => {
 				if(answer.choices == null)
 					answer.choices = []
 
+
+
 				// If exclusive simply override
 				if(maxSelection == 1) {
+					prevChoices = answer.choices;
 					answer.choices = newChoices
 				}
 				// TODO: > 1 case?
@@ -278,6 +284,7 @@ export default (passport) => {
 							for(let j = 0; j < answer.choices.length; j++) {
 								// Replace
 								if(answer.choices[j].choiceID == newChoices[i].choiceID) {
+									prevChoices.push(answer.choices[j])
 									answer.choices[j] = newChoices[i]
 									replaced = true
 									break
@@ -291,18 +298,21 @@ export default (passport) => {
 				}
 			}
 
-			answer.save(err => {
-				if (err)
-					util.errorMessage(res, err, "updating answer")
-				else {
+			propogateChanges(answer, prevChoices)
+			.then(() => {
+				answer.save(err => {
+					if(err) 
+						throw err
+
 					SDCFormResponse.updateOne({_id: newAnswer.responseID}, {updatedAt: timestamp}, (err) => {
-						if (err) {
-							util.errorMessage(res, err, "updating response");
-						} else {
-							res.sendStatus(200);
-						}
+						if (err)
+							throw err
+						res.sendStatus(200);
 					})
-				}	
+				})
+			})
+			.catch(err => {
+				util.errorMessage(res, err, "updating answer")
 			})
 		})
 	})
@@ -377,6 +387,83 @@ export default (passport) => {
 }
 
 
+function cacheForm(form) {
+	if(!(form.referenceID in formCache)) {
+		var newForm = {
+			form:form,
+			map:{}
+		}
+
+		for(let i = 0; i < form.nodes.length; i++) {
+			newForm.map[form.nodes[i].referenceID] = form.nodes[i]
+		}
+		newForm.getNode = (x) => {
+			return newForm.map[x]
+		}
+		formCache[form.referenceID] = newForm
+	}
+	return formCache[form.referenceID]
+}
+
+function propogateChanges(answer, prevChoices) {
+	console.log("Propogating changes for answer", answer, "prev choices", prevChoices)
+	return new Promise((resolve, reject) => {
+		if(prevChoices == null || prevChoices.length == 0) {
+			resolve()
+			return
+		}
+
+		var response 
+		SDCFormResponse.findOne({_id:answer.responseID})
+		.then(_response => {
+			if(!_response)
+				reject('response not found')
+			response = _response
+			console.log('RESPONSE!', response)
+			return SDCForm.findOne({diagnosticProcedureID:response.diagnosticProcedureID, version:response.formVersion})
+		})
+		.then(_form => {
+			if(!_form)
+				reject('form not found')
+			var form = cacheForm(_form)
+			var answersToDelete = []
+			var node = form.getNode(answer.nodeID)
+			console.log("NODE", node)
+
+		    // Check dependents against prevChoiceIDs
+		    var getDependencies = (nd, choiceIDs = []) => {
+		        if(!nd || !nd.dependencies)
+		            return null
+
+		        var deps = nd.dependencies.filter(x => {
+		            if(x.choiceID != null)
+		                return choiceIDs.includes(x.choiceID)
+		            else 
+		                return true
+		        })
+
+		        answersToDelete.push.apply(answersToDelete, deps.map(x => {return x.nodeID}))
+		        for(let i = 0; i < deps.length; i++) {
+		            var nd2 = form.getNode(deps[i].nodeID)
+		            getDependencies(nd2, [deps[i].choiceID])
+		        }
+		    }
+		    getDependencies(node, prevChoices.map(x => {return x.choiceID}))
+
+			/*// Check dependents against prevChoiceIDs
+			for(let j = 0; j < prevChoices.length; j++) {
+				var choice = prevChoices[j]
+				var deps = node.dependencies.filter(x => {return x.choiceID == choice.choiceID}).map(x => {return x.nodeID})
+				answersToDelete.push.apply(answersToDelete, deps)
+			}*/
+			
+			console.log("Deleting nodes", answersToDelete)
+			return SDCFormAnswer.deleteMany({nodeID:{$in:answersToDelete}, instance:answer.instance})
+		})
+		.then(resolve)
+		.catch(reject)
+	})
+}
 /** 
  * Get a response joined with its answers
  * @param responseID

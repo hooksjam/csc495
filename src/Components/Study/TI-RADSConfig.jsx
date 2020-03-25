@@ -1,5 +1,40 @@
 import React from "react"
 
+export const overrides = {
+    'LI_78046_78046.100004300':'cystic/almost completely cystic',
+    'LI_78047_78047.100004300':'spongiform',
+    'LI_78048_78048.100004300':'mixed cystic and solid',
+    'LI_78044_78044.100004300':'solid/almost completely solid',
+    'LI_78045_78045.100004300':'shadowing calcifications prevent assessment',
+    'LI_78049_78049.100004300':'anechoic',
+    'LI_78050_78050.100004300':'iso/hyperechoic',
+    'LI_78051_78051.100004300':'hypoechoic',
+    'LI_78052_78052.100004300':'very hypoechoic',
+    'LI_78053_78053.100004300':'cannot be determined',
+    'LI_78054_78054.100004300':'wider than tall or round',
+    'LI_78055_78055.100004300':'tall than wide',
+    'LI_78056_78056.100004300':'smooth',
+    'LI_78057_78057.100004300':'ill-defined',
+    'LI_78058_78058.100004300':'lobulated/irregular',
+    'LI_78059_78059.100004300':'extra-thyroidal extension',
+    'LI_78060_78060.100004300':'border not seen clearly',
+    'LI_78061_78061.100004300':'none',
+    'LI_78062_78062.100004300':'large comet-tail artifacts',
+    'LI_78063_78063.100004300':'macrocalcifications',
+    'LI_78064_78064.100004300':'peripherial calcifications',
+    'LI_78065_78065.100004300':'punctate echogenic foci',
+    'LI_77991_77991.100004300':'length',
+    'LI_77992_77992.100004300':'width',
+    'LI_77993_77993.100004300':'height',
+    'LI_78001_78001.100004300':'length',
+    'LI_77999_77999.100004300':'width',
+    'LI_78000_78000.100004300':'height',
+    'LI_78034_78034.100004300':'length',
+    'LI_78035_78035.100004300':'width',
+    'LI_78039_78039.100004300':'height',
+    'LI_78040_78040.100004300':'volume',
+}
+
 export const reduction = {
     "meta": {
         "date": "date",

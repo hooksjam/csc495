@@ -1,5 +1,9 @@
 import React from "react"
 
+export const overrides = {
+
+}
+
 export const reduction = {
     "meta": {
         "date": "date",

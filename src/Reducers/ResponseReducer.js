@@ -72,7 +72,7 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
             var key = `${answer.nodeID}_${answer.instance}`
             var response = state.cache[answer.responseID]
             console.log("ADD ANSWER", answer, action.options)
-            if(answer.choices != null && answer.choices.length > 0 && 'maxSelections' in action.options && action.options.maxSelections == 0 && key in response.map) {
+            if(answer.choices != null && answer.choices.length == 1 && 'maxSelections' in action.options && action.options.maxSelections == 0 && key in response.map) {
                 console.log("DERP")
                 // Add to existing answer
                 var existing = response.map[key]
@@ -85,6 +85,9 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
                     existing.choices.push(choice)
                 }
             } else {
+                if(key in response.map) {
+                    propogateChanges(response, answer, action.formCache, response.map[key].choices)
+                }
                 console.log("LERP")
                 response.map[key] = answer
             }
@@ -110,5 +113,38 @@ export function response(state = {loading:false, results:{}, cache:{}}, action) 
         }
         default:
             return state
+    }
+}
+
+var propogateChanges = (response, answer, formCache, prevChoices) => {
+    if(prevChoices == null || prevChoices.length == 0)
+        return
+    var form = formCache[response.diagnosticProcedureID]
+    var answersToDelete = []
+    var node = form.getChildrenFn(answer.nodeID)
+    // Check dependents against prevChoiceIDs
+    var getDependencies = (nd, choiceIDs = []) => {
+        if(!nd || !nd.dependencies)
+            return null
+
+        var deps = nd.dependencies.filter(x => {
+            if(x.choiceID != null)
+                return choiceIDs.includes(x.choiceID)
+            else 
+                return true
+        })
+
+        answersToDelete.push.apply(answersToDelete, deps.map(x => {return x.nodeID}))
+        for(let i = 0; i < deps.length; i++) {
+            var nd2 = form.getChildrenFn(deps[i].nodeID)
+            getDependencies(nd2, [deps[i].choiceID])
+        }
+    }
+    getDependencies(node, prevChoices.map(x => {return x.choiceID}))
+
+    for(let i = 0; i < answersToDelete.length;  i++) {
+        var k = `${answersToDelete[i]}_${answer.instance}`
+        if(k in response.map)
+            delete response.map[k]
     }
 }

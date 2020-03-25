@@ -21,13 +21,14 @@ class Lung_RADS extends React.Component {
         return {active:nextProps.active}
     }
 
+    getGraph() {
+    }
+
     render() {
         return (
             <React.Fragment>
             <Lung_RADSChart focusResult = {this.props.focusResult}>
             </Lung_RADSChart>
-            <Lung_RADSGraph>
-            </Lung_RADSGraph>
             </React.Fragment>
         );
     }

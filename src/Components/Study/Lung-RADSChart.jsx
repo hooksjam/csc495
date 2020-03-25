@@ -1,7 +1,21 @@
 import React from "react"
 import { connect } from 'react-redux'
-import { Lung_RADSGraph, Lung_RADSRow } from 'Components'
+import { RADSTable, RADSGraph, Lung_RADSGraph, Lung_RADSRow, Lung_RADSSummary } from 'Components'
 import { rotateResults } from 'Helpers'
+import { StudyActions } from 'Actions'
+
+
+var overrides = {
+}
+
+var parseVal = (v) => {
+    if(!v)
+        return null
+    var v = JSON.stringify(v).replace(/"/g, '')
+    if(/^[0-9\.]+$/.test(v))
+        v = parseFloat(v)
+    return v
+}
 
 class Lung_RADSChart extends React.Component {
 	constructor(props) {
@@ -10,7 +24,8 @@ class Lung_RADSChart extends React.Component {
 			summary:null,
 		}
 		this.getStyle = this.getStyle.bind(this)
-		this.getSummary = this.getSummary.bind(this)
+		this.getHoverGraph = this.getHoverGraph.bind(this)
+		this.close = this.close.bind(this)
 	}
 
     static getDerivedStateFromProps(nextProps, prevState) {
@@ -40,38 +55,49 @@ class Lung_RADSChart extends React.Component {
         return style
     }
 
-    getSummary() {
-    	var keys = ["date", "responseID", "solid", "partsolid", "partsolid-solid", "GGN"]
-		var propSet = new Set(keys)
-		console.log("Propset", propSet)
-    	return this.state.summary.map((x,ix) => {
-    		return <div className="nodule" key={ix}>
-    			<h1> Nodule {x[0].nodule_number} </h1>
-    			<div style={{"display":"flex", "flexDirection":"row", "justifyContent":"space-around"}}>
-    				<div className="results">
-		    			{x.map((y, iy) => {
-		    				return <div className="result" key={iy} onClick={()=>{this.props.focusResult(y.responseID, 0, ix)}}>
-		    					{Object.keys(y)
-		    						.filter(y => {return propSet.has(y)})
-		    						.sort((a, b) => {
-		    							return keys.indexOf(a) - keys.indexOf(b)
-		    						})
-		    						.map(z => {
-		    						// return null
-		    						return (<React.Fragment><span> <b>{JSON.stringify(z).replace(/"/g,'')}</b>: {JSON.stringify(y[z]).replace(/"/g, '')}</span><br/></React.Fragment>)
-		    					})}
-		    				</div>	
-		    			})}
-		    			{/*Nodule properties*/}
-	    			</div>
-	    			<div className="graph">
-	    				<Lung_RADSGraph nodule_number={x[0].nodule_number}>
-	    				</Lung_RADSGraph>
-	    			</div>
-	    		</div>
-    		</div>
-    	})
+    getHoverGraph() {
+        var nodules_graph = {
+            "date":0, 
+            "solid":0,
+            "partsolid":0,
+            "partsolid-solid":0,
+            "GGN":0,
+        }
 
+        var temp = {}
+        for(let i = 0; i < this.state.summary.length; i++) {
+        	var nod = this.state.summary[i]
+
+        	for(let j = 0; j < nod.length; j++) {
+        		var nodule = nod[j]
+        		var number = nodule.nodule_number
+	        	if(!this.props.focusItems.includes(number)) {
+	        		break;
+	        	}
+
+        		if(!(nodule.date in temp))
+        			temp[nod[j].date] = {}
+        		for(var key in nod[j]) {
+        			if(key != 'date' && key in nodules_graph) {
+        				temp[nod[j].date][`${number}_${key}`] = nodule[key]
+        			}
+        		}
+        	}
+        }
+        var focusNodules = Object.keys(temp).map(x => {
+        	var val = temp[x]
+        	val['date'] = x
+        	return val
+        })
+        if(focusNodules.length > 0) {
+        	return <RADSGraph data={focusNodules}/>
+        }
+        else
+        	return null;
+    }
+
+    close() {
+    	this.props.focus(null)
     }
 
 	render() {
@@ -80,7 +106,8 @@ class Lung_RADSChart extends React.Component {
 			return null
 
 		return (
-			 <div className="studyAid Lung-RADS">
+			<React.Fragment>
+			<div className="studyAid Lung-RADS">
 	            <h1> Lung-RADS<sup>&copy;</sup> Version 1.1</h1>
 	            <h3> Study Categories Release Date: 2019 </h3>
 	            <table>
@@ -302,20 +329,28 @@ class Lung_RADSChart extends React.Component {
 	                </tr>  
 	            </table>
 
-	            <div class="summary">
-	            	{this.getSummary()}
-	            </div>
-	        </div>)
+	            {/*<Lung_RADSSummary focusResult={this.props.focusResult}/>*/}
+	            
+	        </div>
+	        {this.props.focusItems.length > 0 && 
+	        <div className="hover noselect">
+                <div className="close" onClick={this.close}>
+                    <div className="fas fa-times"/>
+                </div>
+                {this.getHoverGraph()}
+            </div>}
+			</React.Fragment>)
 	}
 }
 
 function mapState(state) {
     const {  study } = state
 
-    return { results:study.results, answers:study.answers }
+    return { results:study.results, answers:study.answers, names:study.names, focusItems:study.focusItems  }
 }
   
 const actionCreators = {
+	focus: StudyActions.focusItems
 }
 
 const connectedLung_RADSChart = connect(mapState, actionCreators)(Lung_RADSChart)

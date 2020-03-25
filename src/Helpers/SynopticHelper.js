@@ -224,14 +224,14 @@ var evalPred = (obj, test) => {
             if(Array.isArray(pred)) {
                 var ret = pred.map(x => {
                     if(x in test)
-                        return test[x].choiceID
+                        return test[x]//.choiceID
                     else
                         return null
                 })
                 return ret
             } else {
                 if(pred in test)
-                    return test[pred].choiceID
+                    return test[pred]//.choiceID
                 else
                     return null
             }

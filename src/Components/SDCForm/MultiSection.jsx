@@ -58,10 +58,10 @@ export class MultiSection extends React.Component {
                 if(!(key in nextProps.response.map))
                     break
             }
-            if(prevState.currentSection >= i)
+            if(prevState.currentSection >= i-1)
                 return {sectionCount: i, currentSection: i-1, responseID:nextProps.response._id}
             else
-                return {sectionCount: i, responseID:nextProps.response._id}
+                return {sectionCount: i, currentSection: 0, responseID:nextProps.response._id}
         }
         return null
     }

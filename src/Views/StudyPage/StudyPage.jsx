@@ -6,6 +6,8 @@ import {
     ESQueryDialog,
     Lung_RADS,
     TI_RADS,
+    Lung_RADSSummary,
+    TI_RADSSummary,
     SDCForm,
     Options,
  } from 'Components'
@@ -18,6 +20,11 @@ var screenChangeThreshold = 800
 const aidMap = {
    PKG_LDCT_LUNG: {name:'Lung-RADS', component:Lung_RADS},
    PKG_THYROID_US: {name:'TI-RADS', component:TI_RADS},
+}
+
+const summaryMap = {
+   PKG_LDCT_LUNG: {name:'Lung-RADS', component:Lung_RADSSummary},
+   PKG_THYROID_US: {name:'TI-RADS', component:TI_RADSSummary},
 }
 
 var dummyPatients = [
@@ -134,6 +141,7 @@ class StudyPage extends React.Component {
         this.getPatients = this.getPatients.bind(this)
         this.getStudyAid = this.getStudyAid.bind(this)
         this.getForm = this.getForm.bind(this)
+        this.getSummary = this.getSummary.bind(this)
 
         this.nextPatient = this.nextPatient.bind(this)
         this.prevPatient = this.prevPatient.bind(this)
@@ -191,7 +199,6 @@ class StudyPage extends React.Component {
     }
 
     focusResult(responseID, nodeID) {
-        console.log("FOCUS!", responseID, nodeID, this.state)
         var match = -1 
         var results = this.state.patients[this.state.currentPatient].results
         for(var i = 0; i < results.length; i++) {
@@ -253,7 +260,7 @@ class StudyPage extends React.Component {
 
         var result = this.getCurrentResult()
         if(result) {
-            var style = {height:"100%", "display":"flex"}
+            var style = {height:"100%", "display":"flex", "flexDirection":"column"}
             if(this.state.currentMode != 1) {
                 style.display = "none"
             }
@@ -269,7 +276,7 @@ class StudyPage extends React.Component {
 
                 return <div style={style}>
                     {/*<Lung_RADS patient={this.state.patients[this.state.currentPatient]}/>}*/}
-                    <Aid active={this.state.currentMode == 1} focusResult={this.focusResult} rawResults={rawResults}></Aid>{/* patient={dummyPatients[0]} patientID={patientID} rawResults={rawResults}/>*/}
+                    <Aid active={this.state.currentMode != 0} focusResult={this.focusResult} rawResults={rawResults}></Aid>{/* patient={dummyPatients[0]} patientID={patientID} rawResults={rawResults}/>*/}
                 </div>
             } else {
                 return null
@@ -288,9 +295,10 @@ class StudyPage extends React.Component {
         
 
         if(result) {
-            var style = {height:"100%"}
-            if(this.state.currentMode != 0)
-                style.display = "hidden"
+            var style = {height:"100%", "display":"flex"}
+            if(this.state.currentMode != 0) {
+                style.display = "none"
+            }
 
             if(result.diagnosticProcedureID && result.diagnosticProcedureID != "") {
                 return <div style={style}>
@@ -313,6 +321,37 @@ class StudyPage extends React.Component {
             /*return <div className="studyInfo">
                 <h2> Add a new result </h2>
             </div>*/
+        }
+    }
+
+    getSummary() {
+        if(this.state.patients.length == 0 || this.state.patients[this.state.currentPatient].results.length == 0 || !this.props.form)
+            return null
+
+        var result = this.getCurrentResult()
+        if(result) {
+            var style = {height:"100%", "display":"flex", "flexDirection":"column", "overflow-y":"scroll"}
+            if(this.state.currentMode != 2) {
+                style.display = "none"
+            }
+
+            if(result.diagnosticProcedureID && result.diagnosticProcedureID != "") {
+                var patientID = this.state.patients[this.state.currentPatient].id
+                var rawResults = this.props.response.results[patientID]
+                .filter(x => {return x in this.props.response.cache})
+                .map(x => {return this.props.response.cache[x]})
+                .filter(x => {return x.diagnosticProcedureID == result.diagnosticProcedureID})
+ 
+                const Summary = summaryMap[result.diagnosticProcedureID].component
+
+                return <div style={style}>
+                    <Summary focusResult={this.focusResult} ></Summary>
+                </div>
+            } else {
+                return null
+            }
+        } else {
+            return null
         }
     }
 
@@ -359,7 +398,6 @@ class StudyPage extends React.Component {
     }
 
     addResult() {
-        console.log(this.state.patients)
         this.props.addResponse(0, this.state.patients[this.state.currentPatient].id)
         this.setState({currentResult:0})
     }
@@ -458,6 +496,9 @@ class StudyPage extends React.Component {
                                 <div className={`toolItem ${this.state.currentMode==1?"selected":""}`} onClick={()=>{this.selectMode(1)}}>
                                     <span>{aidMap[result.diagnosticProcedureID].name}</span>
                                 </div>
+                                <div className={`toolItem ${this.state.currentMode==2?"selected":""}`} onClick={()=>{this.selectMode(2)}}>
+                                    <span>Summary</span>
+                                </div>
                             </div>}
                             {this.state.collapseNav && 
                                 <React.Fragment>
@@ -508,6 +549,7 @@ class StudyPage extends React.Component {
                     </div>}
 
                     <div className="content">
+                        {this.getSummary()}
                         {this.getStudyAid()}
                         {this.getForm()}
                         {/*this.state.currentMode == 1 && getStudyAid()*/}

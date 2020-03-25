@@ -11,23 +11,20 @@ class RADSGraph extends React.Component {
     constructor(props) {
         super(props)
         this.state = {
-            data:null
-
+            data:null,
+            width:this.props.width||600,
+            height:this.props.height||400,
         }
+
         this.getGraph = this.getGraph.bind(this)
         this.close = this.close.bind(this)
     }
 
     static getDerivedStateFromProps(nextProps, prevState) {
-        console.log("DERP!")
-        /*if(!nextProps.results) {
-            return null
-        }*/
-
+        // console.log("DATA", nextProps.data)
         // Sort by date
         var data = nextProps.data.sort((a, b) => {
-            //return new Date(b.date).localeCompare(b.createdAt)
-            return new Date(b.date) - new Date(a.date)
+            return new Date(a.date) - new Date(b.date)
         }) 
 
         var keys = new Set()
@@ -37,8 +34,8 @@ class RADSGraph extends React.Component {
                     keys.add(key)
             }
         }
+        
         keys = Array.from(keys)
-        console.log("DAT", data, "keys", keys)
 
         return {
             data:data,
@@ -81,19 +78,19 @@ class RADSGraph extends React.Component {
 
         return (<LineChart
             key={'test'}
-            width={600}
-            height={400}
+            width={this.state.width}
+            height={this.state.height}
             data={this.state.data}
             margin={{ top: 30, right: 40, left: 60, bottom: 30 }}
         >
-            <XAxis domain={['auto', 'auto']} dataKey="date">
+            <XAxis domain={['auto', 'auto']} dataKey="date" interval={0}>
               <Label value="Date" position="insideBottom" dy={20}/>
             </XAxis>
-            <YAxis domain={['auto', 'auto']} unit="cm" > 
+            <YAxis domain={['auto', 'auto']} unit="mm" > 
               <Label value="Diameter" position="insideLeft" dx={-60} textAnchor="end"/>
             </YAxis>
-            <Legend layout="vertical" verticalAlign="middle" align="right" />
-            <Tooltip />
+            <Legend layout="vertical" verticalAlign="middle" align="center" wrapperStyle={{right:"50px", top:"150px"}}/>
+            <Tooltip/>
             <CartesianGrid stroke="#f5f5f5" />
             {lines}
         </LineChart>)

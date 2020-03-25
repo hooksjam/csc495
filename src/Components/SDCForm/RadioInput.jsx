@@ -26,8 +26,6 @@ export class RadioInput extends React.Component {
         this.getSubNodes = this.getSubNodes.bind(this)
     }
 
-
-
     static getDerivedStateFromProps(nextProps, prevState) {
         if(prevState.selfUpdate) {
             return {selfUpdate:false}
@@ -40,6 +38,11 @@ export class RadioInput extends React.Component {
                     selectedChoice:answer.choices[0].choiceID,
                     responseID: nextProps.response._id
                 }
+            } else {
+                if(nextProps.response != null)
+                    return {selectedChoice:null, responseID:nextProps.response._id}
+                else
+                    return {selectedChoice:null, responseID:null}
             }
         }
         if(nextProps.response != null)
@@ -157,8 +160,8 @@ export class RadioInput extends React.Component {
                         id={x.referenceID} 
                         name={this.props.node.referenceID} 
                         value={x.referenceID}
-                        defaultChecked={x.referenceID == this.state.selectedChoice} 
-                        onClick={this.onChange}></input>
+                        checked={x.referenceID == this.state.selectedChoice} 
+                        onChange={this.onChange}></input>
                     <div className="optionLabel"> {x.title} </div>
                     {this.getField(x)}
                     {this.props.showID && <div className="identifier"><span>{x.referenceID}</span></div>}

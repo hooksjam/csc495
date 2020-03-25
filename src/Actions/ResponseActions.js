@@ -8,13 +8,13 @@ function addAnswer(response, node, answer, options = {}) {
         dispatch(request(node.referenceID))
             await ResponseServices.addAnswer(answer, options)
                 .then(
-                    x => dispatch(success(answer, options)),
+                    x => dispatch(success(answer, options, getState().form.cache )),
                     error => dispatch(failure(error.toString()))
                 )
     }
 
     function request(referenceID) {return { type: ResponseConstants.ADD_ANSWER_REQUEST, referenceID } }
-    function success(answer, options) { return { type: ResponseConstants.ADD_ANSWER_SUCCESS, answer, options } }
+    function success(answer, options, formCache) { return { type: ResponseConstants.ADD_ANSWER_SUCCESS, answer, options, formCache } }
     function failure(error) { return { type: ResponseConstants.ADD_ANSWER_FAILURE, error } }
 }
 

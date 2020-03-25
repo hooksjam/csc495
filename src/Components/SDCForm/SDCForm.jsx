@@ -158,7 +158,7 @@ class SDCForm extends React.Component {
                 </div>
                 <div className="formContent" ref={(x) => {this.content = x}} onScroll={this.handleScroll}>
                     {this.getTitle()}
-                    <div className="summary" ref={(x) => {this.summary = x}}>
+                    <div className="formSummary" ref={(x) => {this.summary = x}}>
                         {this.getProperties()}
                     </div>
                     <div className="sections">

@@ -72,13 +72,18 @@
 
 .summary {
 	display:flex;
-	margin-top:15px;
+	flex-direction: column;
+	margin:15px auto 15px auto;
+	max-width:1500px;
 	background-color:transparent;
 	h2 {
 		text-align:left;
 	}
 
 	.nodule {
+		display:flex;
+		flex-direction: column;
+		text-align: center;
 		background-color:#eee;
 		border-radius:5px;
 		padding:15px;
