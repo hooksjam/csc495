@@ -1,0 +1,170 @@
+.TI-RADS {
+	background-image: linear-gradient(#f4f4f1, #c8c3bb);
+
+	h1 {
+		color:#354b8c;
+		font-weight:600;
+	}
+
+	.noduleSelect {
+		margin-left:auto;
+		margin-right:auto;
+		min-height:50px;
+		// min-width:150px;
+	}
+
+	.hover {
+		background-color:white;
+		border: 1px solid black;
+		border-radius:5px;
+		position:absolute;
+		margin-left:75px;
+
+		pre {
+			width:100%;
+		}
+	}
+
+	.findingsRow {
+		display:flex;
+		flex-direction:row;
+		justify-content:space-between;
+
+		.findings {
+			display:flex;
+			flex-direction: column;
+			background-color: white;
+			border: 1px solid black;
+			padding:7px;
+			width:18%;
+
+			.predicate {
+				display:flex;
+				flex-direction: row;
+				color:#bbb;
+				padding-bottom: 5px;
+
+				&.satisfy {
+					color:#444;
+				}
+			}
+		}
+	}
+
+	.addInfo {    
+		//background-color: #d7e3c2;
+		background-image: linear-gradient(#dce4ef,#93acc3);
+	    margin: 40px auto;
+	    border: 2px solid black;
+	    border-radius: 15px;
+	    padding: 15px 30px;
+	}
+
+	.scoreWrapper {
+		width:18%;
+		padding:0 5px;
+
+		.score {
+			border: 2px solid black;
+		    padding: 10px 25px;
+		    margin-bottom: 0px;
+		    border-radius: 25px;
+		    text-align:center;
+		}
+
+		.scoreSummary {
+			border: 2px solid black;
+		    padding: 0 15px 5px 15px;
+			display:flex;
+			flex-direction: column;
+		    border-radius: 25px;
+		    text-align:center;
+		    min-height:100px;
+		}
+
+		.arrow {
+			display:flex;
+			color:#93acc3;
+			font-size:30px;
+			.fas {
+				margin:0 auto;
+			}
+		}
+	}
+
+	.scoreSummary, .findings {
+		h3 {
+			color:#82101c;
+			text-align:center;
+			margin:5px auto 0px auto;
+			font-weight:550;
+		}
+
+		h4 {
+			font-style: italic;
+			color:#5c7492;
+			text-align:center;
+			margin:5px auto 15px auto;
+		}
+	}
+
+
+	.reference {
+		margin-top:25px;
+		width:100%;
+
+		table {
+			width:100%;
+			background-image: linear-gradient(white, #d6dee9);
+			border: 2px solid black;
+
+			thead {
+				background-color:#d2d9ea;
+				th {
+					text-align:center;
+				}
+			}
+
+			tr {
+
+			}
+
+			th, td {
+				border: 2px solid black;
+				width:20%;
+				vertical-align: top;
+			}
+
+			td {
+				padding:5px;
+				hyphens: auto;
+			}
+		}
+	}
+}
+
+.results {
+	table {
+
+	}
+
+	thead {
+		background-color:#aaa;
+
+	}
+
+	.mainRow {
+		cursor:pointer;
+		&:hover {
+			background-color:#ccc;
+		}
+	}
+
+	tr, td, th {
+		padding:5px;
+	}
+
+	th, td, .mainRow {
+		border: 1px solid #444;
+	}
+}

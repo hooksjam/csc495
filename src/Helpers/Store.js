@@ -14,7 +14,7 @@ export function configureStore(preloadedState) {
       compose(
         applyMiddleware(
           routerMiddleware(History), // for dispatching history actions
-          loggerMiddleware,
+          // loggerMiddleware,
           thunkMiddleware
         ),
       ),      

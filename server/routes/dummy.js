@@ -4,7 +4,7 @@ import fetch from 'node-fetch'
 import fs from 'fs'
 import FormData from 'form-data'
 import path from 'path'
-import parser from '../parser'
+import parser from '../parserV2'
 import elastic from '../elastic'
 
 
@@ -92,6 +92,7 @@ function handleErrors(res) {
 }
 
 var clearForms = () => {
+	console.log("Clear forms!")
 	return new Promise((resolve, reject) => {
 		SDCForm.deleteMany({}, err => {
 			if(err) reject()
@@ -163,6 +164,7 @@ var addForms = () => {
 
 			var formID = forms[i]
 			var relativePath = './forms/' + formID + '.xml';
+			console.log("Adding form", formID)
 			parser.addFormAtPath(formID, relativePath)
 			.then(() => {
 				formsGenerated++
@@ -464,9 +466,11 @@ export default (passport) => {
 
 		// Clear existing data
 		// First step has this wacky wrapping
-		new Promise((resolve, reject) => {
-			if(req.query.clear == 1) {
-				clearForms()
+		return new Promise((resolve, reject) => {
+			if(req.query.clear != 0) { 
+				console.log("Clearing index")
+				elastic.deleteIndex() 
+				.then(elastic.initIndex)
 				.then(resolve)
 				.catch(reject)
 			} else {
@@ -474,41 +478,15 @@ export default (passport) => {
 			}
 		})
 		.then(() => {
-			return new Promise((resolve, reject) => {
-				if(req.query.clear != 0) { 
-					elastic.deleteIndex() 
-					.then(elastic.initIndex)
-					.then(resolve)
-					.catch(reject)
-				} else {
-					resolve()
-				}
-			})
-		})
-		.then(() => {
 			if(req.query.clear != 0) {
-				return clearAnswers()
+				return clearAnswers().then(clearLinks).then(clearResponses)
 			} else {
 				return
 			}
 		})	
 		.then(() => {
-			if(req.query.clear != 0) {
-				return clearLinks()
-			} else {
-				return
-			}
-		})
-		.then(() => {
-			if(req.query.clear != 0) {
-				return clearResponses()
-			} else {
-				return
-			}
-		})
-		.then(() => {
 			if(req.query.forms == 1)
-				return addForms()
+				return clearForms().then(addForms)
 			else
 				return
 		})
@@ -567,6 +545,14 @@ export default (passport) => {
 	router.get('/reset', (req, res) => {
 		res.redirect('/api/dummy?clear=1&forms=1&form=Adrenal.Bx.Res.129_3.003.001.REL_sdcFDF&responses=10&answers=1')
 	})
+
+	router.get('/forms', (req, res) => {
+		res.redirect('/api/dummy?forms=1')
+	})
+
+	router.get('/test', (req, res) => {
+		res.redirect('/api/dummy?clear=1&forms=1&form=PKG_LDCT_LUNG&responses=10&answers=1')
+	})	
 	
 	router.get('/clear', (req, res) => {
 		clearForms()
@@ -592,6 +578,39 @@ export default (passport) => {
 			res.sendStatus(500)
 		})
 
+	})
+
+	router.get('/answer/clear', (req, res) => {
+		clearAnswers()
+		.then(() => {
+			return new Promise((resolve, reject) => {
+				if(req.query.clear != 0) { 
+					elastic.deleteIndex() 
+					.then(elastic.initIndex)
+					.then(resolve)
+					.catch(reject)
+				} else {
+					resolve()
+				}
+			})
+		})
+		.then(() => {
+			res.sendStatus(200)
+		})
+		.catch(err => {
+			res.sendStatus(500)
+		})
+	})
+
+	router.get('/response/clear', (req, res) => {
+		clearLinks()
+		.then(clearResponses)
+		.then(() => {
+			res.sendStatus(200)
+		})
+		.catch(err => {
+			res.sendStatus(500)
+		})
 	})
 
 	return router

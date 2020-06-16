@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="sdctemplate.xslt"?>
 <SDCPackage xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:ihe:qrph:sdc:2016" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xsi:schemaLocation="urn:ihe:qrph:sdc:2016 ../Schemas/RFD+SDCRetrieveForm.xsd" packageID="PKG_ThyroidNoduleUS" lineage="PKG_ThyroidNoduleUS_1" version="2.1.2" fullURI="_baseURI=cancercare.on.ca&amp;_lineage=PKG_ThyroidNoduleUS_1;_version=2.1.1&amp;_docType=sdcPKG" baseURI="cancercare.on.ca">
 	<XMLPackage>
 		<FormDesign xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" ID="US_Thyroid_CCO.359_2.1.2.DRAFT_sdcFDF" baseURI="cancercare.on.ca" fullURI="_baseURI=cancercare.on.ca&amp;_lineage=US_Thyroid_CCO.359&amp;_version=2.1.2.DRAFT&amp;_docType=sdcFDF" formTitle="CCO Synoptic Template for  Thyroid US" lineage="US_Thyroid_CCO.359" filename="US_Thyroid_CCO.359_2.1.2.DRAFT_sdcFDF.xml" version="2.1.2.DRAFT" xmlns="urn:ihe:qrph:sdc:2016">

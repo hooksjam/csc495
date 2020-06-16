@@ -1,0 +1,162 @@
+// Defining query spec as json document
+{
+	"number_of_nodules": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"type": "number",
+		"query": [
+			{
+				"query": {
+			        "bool": {
+			            "must": [
+			                {
+			                    "match": {
+			                        "diagnosticProcedureID": "PKG_LDCT_LUNG"
+			                    }
+			                },
+			                {
+			                    "match": {
+			                        "choiceTitle" : "Number of lung nodules present in total (any size):" 
+			                    }
+			                }  
+			            ]
+			        }
+			    }
+		    }
+		]
+	},
+	"interval_increase": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"type": "boolean",
+		"query": [
+			{
+				"query": {
+			        "bool": {
+			            "must": [
+			                {
+			                    "match": {
+			                        "diagnosticProcedureID": "PKG_LDCT_LUNG"
+			                    }
+			                },
+			                {
+			                    "match": {
+			                        "choiceTitle" : "Interval increase" 
+			                    }
+			                }  
+			            ]
+			        }
+			    }
+			}
+		]
+	}
+}
+
+// Mongo Spec
+// A query object specifying the fields and values requested and an options object specifying things like selection, ordering etc
+{
+	"IncreaseProfile_1": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"type": "number",
+		"query": [
+			{
+				"query": {"diagnosticProcedureID": "PKG_LDCT_LUNG", "choiceTitle": "Interval increase"},
+				"options": {"formID":1}
+		    },
+			{
+				"query": {"diagnosticProcedureID": "PKG_LDCT_LUNG", "choiceTitle": "Interval increase"},
+				"options": {"formID":1}
+			}
+		]
+	},
+	"interval_increase": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"type": "boolean",
+		"query": [
+			{
+				"query": {
+			        "bool": {
+			            "must": [
+			                {
+			                    "match": {
+			                        "diagnosticProcedureID": "PKG_LDCT_LUNG"
+			                    }
+			                },
+			                {
+			                    "match": {
+			                        "choiceTitle" : "Interval increase" 
+			                    }
+			                }  
+			            ]
+			        }
+			    }
+			}
+		]
+	}
+}
+
+
+// Data ware house transformation spec
+{
+	// Define the warehouse "fields" in terms of basic query language
+	"IncreaseProfile_1": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"synonyms": {
+			"fieldA": "Attentuation",
+			"fieldB": "Comparison",
+			"fieldC": "Lungs Rads Version 1.0"
+		},
+		"query": "(fieldA = PartSolid) & (fieldB = IntervalIncrease) & (fieldC = Category3)"
+	},
+	"NoIncreaseProfile_1": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"synonyms": {
+			"fieldA": "Reason for exam",
+			"fieldB": "Comparison"
+		},
+		"query": "(fieldA = 12 month recall) & (fieldB = Stable nodule)"
+	},
+
+	"HighRiskProfile_1": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"synonyms": {
+			"fieldA": "Number of Nodules",
+			"fieldB": "Lungs Rads Version 1.0"
+		},
+		"query": "(fieldA >= 5) & (fieldB = LungRADS4B)"
+	}
+}
+// When processing each data warehouse item, apply each query to each document and insert the result under the name
+
+
+// E.g. result:
+{
+	"ResponseID": "123",
+	"IncreaseProfile_1": true,
+	"NoIncreaseProfile_1": false
+}
+
+
+// A method thats harder to read but easier to code
+{
+	// Define the warehouse "fields" in terms of basic query language
+	"IncreaseProfile_1": {
+		"diagnosticProcedureID": "PKG_LDCT_LUNG",
+		"query": {
+			"and": [
+				{
+					"Attentuation": "PartSolid",
+					"Operator": "="
+				},
+				{
+					"Comparison": "IntervalIncrease",
+					"Operator": "="
+				},
+				{
+					"Lungs Rads Verison 1.0": "Category3",
+					"Operator": "="
+				}
+			]
+		}
+	}
+}
+
+// Would it be crazy to make a compiler for a basic query language?

@@ -6,17 +6,28 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { History } from 'Helpers';
 import { AlertActions } from 'Actions';
 import { PrivateRoute } from 'Components';
-import { HomePage } from 'Views/HomePage';
-import { LoginPage } from 'Views/LoginPage';
+/*import { LoginPage } from 'Views/LoginPage';
 import { RegisterPage } from 'Views/RegisterPage';
-import { TestPage } from 'Views/TestPage';
 import { UploadFormPage } from 'Views/UploadFormPage';
 import { FormTestPage } from 'Views/FormTestPage';
-import { FormSelectorPage } from 'Views/FormSelectorPage';
 import { FormQueryPage } from 'Views/FormQueryPage';
+import { FormSelectorPage } from 'Views/FormSelectorPage';*/
+import { HomePage } from 'Views/HomePage';
+import { TestPage } from 'Views/TestPage';
+import { QueryPage } from 'Views/QueryPage';
+import { StudyPage } from 'Views/StudyPage';
 
 const theme = createMuiTheme({});
-import './App.css';
+theme.palette.primary.main = "#326295"
+theme.palette.primary.dark = "#274d75"
+theme.palette.primary.light = "#3a73b0"
+
+theme.palette.secondary.main = "#342e53"
+theme.palette.secondary.dark = "#282440"
+theme.palette.secondary.light = "#443d6e"
+
+import './App.css'
+import '../Style/App.scss'
 
 class App extends React.Component {
     constructor(props) {
@@ -24,7 +35,7 @@ class App extends React.Component {
 
         History.listen((location, action) => {
             // clear alert on location change
-            this.props.clearAlerts();
+            // this.props.clearAlerts();
         });
     }
 
@@ -32,19 +43,22 @@ class App extends React.Component {
         const { alert } = this.props;
         return (
             <MuiThemeProvider theme={theme}>
-                <div style={{height: '100%'}}>
+                <div style={{height: '100%', overflow:'hidden'}}>
                     {alert.message &&
                     <div className={`alert ${alert.type}`}>{alert.message}</div>
                     }
                     <Switch>
-                        <Route path="/login" component={LoginPage} />
+                        {/*<Route path="/login" component={LoginPage} />
                         <Route path="/register" component={RegisterPage} />
-                        <Route path="/test" component={TestPage} />
                         <Route path="/form/:diagnosticProcedureID" component={FormTestPage} />
                         <Route path="/formSelector" component={FormSelectorPage} />
                         <Route path="/upload" component={UploadFormPage} />
                         <Route path="/query" component={FormQueryPage} />
-                        <Route path="/" component={LoginPage} />                        
+                        <Route path="/" component={LoginPage} />*/}                        
+                        <Route path="/test" component={TestPage} />
+                        <Route path="/query" component={QueryPage} />                        
+                        <Route path="/study" component={StudyPage} />                        
+                        <Route path="/" component={HomePage} />
                     </Switch>
                 </div>
             </MuiThemeProvider>

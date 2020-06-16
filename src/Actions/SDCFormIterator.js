@@ -77,8 +77,8 @@ export function createFromData(data) {
 			var it = {node: strippedNode}
 
 			// Indicator for new section
-			if(currentNode == 0 || (currentNode > 0 && form.nodes[currentNode-1].section != form.nodes[currentNode].section))
-				it.section = form.sections[form.nodes[currentNode].section]
+			//if(currentNode == 0 || (currentNode > 0 && form.nodes[currentNode-1].section != form.nodes[currentNode].section))
+				//it.section = form.sections[form.nodes[currentNode].section]
 			return it
 		}
 

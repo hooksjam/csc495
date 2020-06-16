@@ -9,6 +9,7 @@
         "test": "NODE_ENV=test mocha --require @babel/register ./server/tests/*.js  --timeout 10000 --exit",
         "serve": "nodemon main.js",
         "start": "export NODE_ENV=development && npm run serve",
+        "startwin": "SET NODE_ENV=development && node main.js",
         "build": "export NODE_ENV=production && npm run prod",
         "prodServer": "npm run build && node dist/server.js",
         "devServer": "webpack --mode development --config webpack.server.config.js && npm run serve",
@@ -80,14 +81,17 @@
         "path": "^0.12.7",
         "react": "^16.9.0",
         "react-copy-to-clipboard": "^5.0.2",
+        "react-datepicker": "^2.14.0",
         "react-dom": "^16.9.0",
         "react-redux": "^7.1.1",
         "react-router-dom": "^5.1.0",
         "react-scripts": "3.1.2",
+        "recharts": "^2.0.0-beta.1",
         "redux": "^4.0.4",
         "redux-logger": "^3.0.6",
         "redux-thunk": "^2.3.0",
         "request": "^2.88.0",
+        "sass-loader": "^8.0.2",
         "script-loader": "^0.7.2",
         "strongpassword": "^1.1.4",
         "style-loader": "^0.23.1",
@@ -100,13 +104,16 @@
         "webpack-dev-server": "^3.9.0",
         "webpack-hot-middleware": "^2.24.3",
         "webpack-node-externals": "^1.7.2",
-        "winston": "^3.2.1"
+        "winston": "^3.2.1",
+        "xml-js": "^1.6.11",
+        "xml2js": "^0.4.23"
     },
     "devDependencies": {
         "chai": "^4.2.0",
         "chai-http": "^4.3.0",
         "mini-css-extract-plugin": "^0.5.0",
         "mocha": "^6.2.1",
+        "node-sass": "^4.13.1",
         "nodemon": "^1.19.2",
         "webpack-dev-middleware": "^3.6.1"
     }

@@ -58,19 +58,18 @@ module.exports = {
                     loader: "html-loader",
                 }
             },
-            {
-                test: /\.ejs$/,
-                use: {
-                    loader: "ejs-loader",
-                    query: {
-                        interpolate: /\{\{(.+?)\}\}/g,
-                        evaluate: /\[\[(.+?)\]\]/g
-                    }
-                }
-            },
             { 
                 test: /\.css$/,
                 use: [ 'style-loader', 'css-loader' ]
+            },
+            { 
+                test: /\.scss$/,
+                loader: ['style-loader','css-loader',
+                    {
+                        loader: 'sass-loader',
+                        options: {sourceMap: true}
+                    }
+                ]
             },
             {
                 test: /\.(png|svg|jpg|gif|xml|yaml)$/,

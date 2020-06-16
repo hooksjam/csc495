@@ -8,10 +8,11 @@ var SDCFormResponseSchema = new Schema({
 	formVersion: {type: Number, default:0},
 	patientID: {type: String},
 	formFillerID: {type: String},
+	date: {type: String},
 	createdAt: {type: String},
 	updatedAt: {type: String, default:undefined},
 	persistentID: {type: String},
-	answers: {type: [SDCFormAnswer.schema], default:undefined},
+	answers: {type: [SDCFormAnswer.schema]},
 	persistentLinks: {type: [{_id:false, link:{type:String}, timestamp: {type: String}}]}
 }, { collection: "SDCFormResponse" })
 

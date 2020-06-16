@@ -55,12 +55,15 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(cors());
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env.NODE_ENV.includes('development')) {
     const configWP = require('../webpack.dev.config');
     const compiler = webpack(configWP);
     app.use(webpackDevMiddleware(compiler, {publicPath: configWP.output.publicPath}));
     app.use(webpackHotMiddleware(compiler));
     app.use(morgan('dev'));
+    // app.use(express.static(path.join(__dirname, 'public')));
+} else if (process.env.NODE_ENV.includes('production')) {
+    // app.use(express.static(path.join(__dirname, 'public')));
 }
 
 const multipartyMiddleWare = multiparty();
@@ -113,10 +116,7 @@ app.get('/persistent/:persistentID', (req, res) => {
     }) 
 });
 
-if (process.env.NODE_ENV === 'production') {
-    app.use(express.static(path.join(__dirname, 'public')));
-}
-
+app.use(express.static(path.join(__dirname, 'public')));
 app.get('/*', (req, res)=>{
     res.sendFile(path.resolve(__dirname, 'public/index.html'));
 });

@@ -9,6 +9,7 @@ import SDCFormAnswer from '../models/SDCFormAnswer'
 import SDCPersistentLink from '../models/SDCPersistentLink'
 import SDCQueryableAnswer from '../models/SDCQueryableAnswer'
 
+var formCache = {}
 
 export default (passport) => {
 	var router = express.Router()
@@ -25,6 +26,8 @@ export default (passport) => {
 
 		var timestamp = util.timestamp()
 		var newResponse = new SDCFormResponse()
+		var date = new Date()
+		newResponse.date = date.toLocaleDateString("en-US")//`${date.getFullYear()}-${date.getMonth()}-${date.getDay()}`
 		newResponse.createdAt = timestamp
 		newResponse.updatedAt = timestamp
 		newResponse.diagnosticProcedureID = response.diagnosticProcedureID
@@ -61,22 +64,47 @@ export default (passport) => {
 		}
 
 		if (req.query.patientID != null) {
-			query.patientID = req.query.patientID;
+			query.patientID = req.query.patientID
 		}
 
 		if (req.query.diagnosticProcedureID != null) {
 			query.diagnosticProcedureID = req.query.diagnosticProcedureID
 		}
 
-		SDCFormResponse.find(query).sort('-updatedAt').exec((err, resp) => {
-				if (err) {
-					util.errorMessage(res, err, "finding SDC forms");
-				} else if(resp.length == 0) {
-					res.send([])
+		SDCFormResponse.find(query).sort('-updatedAt').exec()
+		.then(resp => {
+			if(resp.length == 0) {
+				res.send([])
+			} else {
+				if(req.query.full != null) {
+					// Get answers for response
+					if(resp.length == 0) {
+						res.send([])
+						return
+					}
+
+					Promise.all(resp.map(x => {
+						return SDCFormAnswer.find({responseID:x._id.toString()})
+						.then(answers => {
+							x = x.toObject()
+							x.answers = answers;
+							return x
+						})
+					}))
+					.then(resp => {
+						console.log("FULL ANSWERS", resp)
+						res.send(resp)
+					})
+					.catch(err => {
+						util.errorMessage(err, "getting answers")
+					})
 				} else {
 					res.send(resp)
 				}
-			})
+			}	
+		}).catch(err => {
+			util.errorMessage(res, err, "finding SDC forms");
+		})
 	})
 
 	/**
@@ -99,6 +127,33 @@ export default (passport) => {
 	/**
 	 * Update/submit a form response
 	 */
+	router.put('/procedure', (req, res) => {
+		if (req.body._id == null) {
+			util.errorMessage(res, "no id supplied");
+			return
+		}
+		SDCFormResponse.updateOne({_id:req.body._id}, {diagnosticProcedureID:req.body.diagnosticProcedureID})
+		.then(() => {
+			res.send(200)
+		})
+		.catch(err => {
+			util.errorMessage(res, err, "updating diagnosticProcedureID")
+		})
+	})
+	router.put('/date', (req, res) => {
+		console.log("SET DATE", req.body.date)
+		if (req.body._id == null) {
+			util.errorMessage(res, "no id supplied");
+			return
+		}
+		SDCFormResponse.updateOne({_id:req.body._id}, {date:req.body.date})
+		.then(() => {
+			res.send(200)
+		})
+		.catch(err => {
+			util.errorMessage(res, err, "updating date")
+		})
+	})
 	router.put('/', (req, res) => {
 		// All the answers should already be in the form, at this point we just create a persistent link (if it doesn't exist)
 		if (req.body._id == null) {
@@ -176,24 +231,29 @@ export default (passport) => {
 		if (req.body.answer == null) {
 			util.errorMessage(res, 'no answer provided')
 		}
+
 		var newAnswer = req.body.answer
+		console.log("NEW ANSWER", req.body)
 
 		// Update saved date
 		var timestamp = util.timestamp();
 
 		// Update or create new answer
-		SDCFormAnswer.findOne({responseID: newAnswer.responseID, nodeID: newAnswer.nodeID}, (err, answer) => {
+		SDCFormAnswer.findOne({responseID: newAnswer.responseID, nodeID: newAnswer.nodeID, instance:newAnswer.instance}, (err, answer) => {
 			if(err)
 				util.errorMessage(res, err, "getting answer")
 			else if(!answer) {
 				answer = new SDCFormAnswer()
 				answer.responseID = newAnswer.responseID
 				answer.nodeID = newAnswer.nodeID
+				answer.instance = newAnswer.instance
 			} 
 
+			var prevChoices = []
 			if(newAnswer.field != null) {
 				answer.field = newAnswer.field
 			} else if(newAnswer.choices != null) {
+				var lostChoices = []
 				var newChoices = newAnswer.choices
 				var maxSelection = 0
 				if('maxSelection' in req.body)
@@ -203,8 +263,11 @@ export default (passport) => {
 				if(answer.choices == null)
 					answer.choices = []
 
+
+
 				// If exclusive simply override
 				if(maxSelection == 1) {
+					prevChoices = answer.choices;
 					answer.choices = newChoices
 				}
 				// TODO: > 1 case?
@@ -221,6 +284,7 @@ export default (passport) => {
 							for(let j = 0; j < answer.choices.length; j++) {
 								// Replace
 								if(answer.choices[j].choiceID == newChoices[i].choiceID) {
+									prevChoices.push(answer.choices[j])
 									answer.choices[j] = newChoices[i]
 									replaced = true
 									break
@@ -234,18 +298,21 @@ export default (passport) => {
 				}
 			}
 
-			answer.save(err => {
-				if (err)
-					util.errorMessage(res, err, "updating answer")
-				else {
+			propogateChanges(answer, prevChoices)
+			.then(() => {
+				answer.save(err => {
+					if(err) 
+						throw err
+
 					SDCFormResponse.updateOne({_id: newAnswer.responseID}, {updatedAt: timestamp}, (err) => {
-						if (err) {
-							util.errorMessage(res, err, "updating response");
-						} else {
-							res.sendStatus(200);
-						}
+						if (err)
+							throw err
+						res.sendStatus(200);
 					})
-				}	
+				})
+			})
+			.catch(err => {
+				util.errorMessage(res, err, "updating answer")
 			})
 		})
 	})
@@ -261,6 +328,11 @@ export default (passport) => {
 			return
 		}
 
+		if(req.query.instance == null) {
+			util.errorMessage(res, "instance must be included")
+			return
+		}
+
 		// Deselect choice
 		var choiceID = null
 		if(req.query.choiceID != null) {
@@ -269,7 +341,9 @@ export default (passport) => {
 
 		var responseID = req.query.responseID
 		var nodeID = req.query.nodeID
-		SDCFormAnswer.findOne({responseID: responseID, nodeID: nodeID}, (err, answer) => {
+		var instance = req.query.instance
+
+		SDCFormAnswer.findOne({responseID: responseID, nodeID: nodeID, instance: instance}, (err, answer) => {
 			if(err)
 				util.errorMessage(res, err, "getting answer")
 			else if(answer) {
@@ -286,13 +360,15 @@ export default (passport) => {
 					deleteAnswer = (answer.choices.length == 0)
 				}
 				if(deleteAnswer) {
-					SDCFormAnswer.deleteOne({_id: answer._id}, (err) => {
-						if(err) {
-							util.errorMessage(res, err, 'deleting answer')
-						} else {
-							res.sendStatus(200)
-						}
+					SDCFormAnswer.deleteOne({_id: answer._id})
+					.then(x => {
+						res.sendStatus(200)
 					})
+					.catch(err => {
+						util.errorMessage(res, err, 'deleting answer')
+					})
+
+					// Delete dependencies
 				} else {
 					answer.save(err => {
 						if(err)
@@ -311,6 +387,83 @@ export default (passport) => {
 }
 
 
+function cacheForm(form) {
+	if(!(form.referenceID in formCache)) {
+		var newForm = {
+			form:form,
+			map:{}
+		}
+
+		for(let i = 0; i < form.nodes.length; i++) {
+			newForm.map[form.nodes[i].referenceID] = form.nodes[i]
+		}
+		newForm.getNode = (x) => {
+			return newForm.map[x]
+		}
+		formCache[form.referenceID] = newForm
+	}
+	return formCache[form.referenceID]
+}
+
+function propogateChanges(answer, prevChoices) {
+	console.log("Propogating changes for answer", answer, "prev choices", prevChoices)
+	return new Promise((resolve, reject) => {
+		if(prevChoices == null || prevChoices.length == 0) {
+			resolve()
+			return
+		}
+
+		var response 
+		SDCFormResponse.findOne({_id:answer.responseID})
+		.then(_response => {
+			if(!_response)
+				reject('response not found')
+			response = _response
+			console.log('RESPONSE!', response)
+			return SDCForm.findOne({diagnosticProcedureID:response.diagnosticProcedureID, version:response.formVersion})
+		})
+		.then(_form => {
+			if(!_form)
+				reject('form not found')
+			var form = cacheForm(_form)
+			var answersToDelete = []
+			var node = form.getNode(answer.nodeID)
+			console.log("NODE", node)
+
+		    // Check dependents against prevChoiceIDs
+		    var getDependencies = (nd, choiceIDs = []) => {
+		        if(!nd || !nd.dependencies)
+		            return null
+
+		        var deps = nd.dependencies.filter(x => {
+		            if(x.choiceID != null)
+		                return choiceIDs.includes(x.choiceID)
+		            else 
+		                return true
+		        })
+
+		        answersToDelete.push.apply(answersToDelete, deps.map(x => {return x.nodeID}))
+		        for(let i = 0; i < deps.length; i++) {
+		            var nd2 = form.getNode(deps[i].nodeID)
+		            getDependencies(nd2, [deps[i].choiceID])
+		        }
+		    }
+		    getDependencies(node, prevChoices.map(x => {return x.choiceID}))
+
+			/*// Check dependents against prevChoiceIDs
+			for(let j = 0; j < prevChoices.length; j++) {
+				var choice = prevChoices[j]
+				var deps = node.dependencies.filter(x => {return x.choiceID == choice.choiceID}).map(x => {return x.nodeID})
+				answersToDelete.push.apply(answersToDelete, deps)
+			}*/
+			
+			console.log("Deleting nodes", answersToDelete)
+			return SDCFormAnswer.deleteMany({nodeID:{$in:answersToDelete}, instance:answer.instance})
+		})
+		.then(resolve)
+		.catch(reject)
+	})
+}
 /** 
  * Get a response joined with its answers
  * @param responseID

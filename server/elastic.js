@@ -65,20 +65,46 @@ function deleteIndex() {
  * Initialize our elastic search index
  */
 function initIndex() {
+	console.log("Init index")
 	return hasClient()
 	.then(clientAlive => {
 		if(!clientAlive)
 			return
 
-		return client.indices.create({
+		client.indices.create({
 			index:index_name
-		}, (err, resp, status) => {
+		})
+		.then(putMapping)
+		.catch((err) => {
 			if(err) {
 				if(err.message.indexOf("resource_already_exists_exception") == -1) 
 					logger.error(err)
 			}
-		});
+		})
 	})
+}
+
+/** 
+ * Create mapping for index
+ */
+async function putMapping () {
+    console.log("Creating Mapping index");
+    return client.indices.putMapping({
+        index: index_name,
+        body: {
+	        properties: { 
+	            diagnosticProcedureID: { type: "keyword" },
+	            choiceTitle: { type: "keyword" },
+	        }
+	    }
+    }).catch((err) => {
+        if (err) {
+          console.error(err)
+        }
+    }).then(() => {
+        console.log('Successfully Created Index')
+        return
+    })
 }
 
 /** 
@@ -267,7 +293,8 @@ function searchRaw(body) {
 		client.search({
 			'index': index_name,
 			'pretty': true,
-			'body':body
+			'body':body,
+			'size':10000
 		})
 		.then(x => {
 			resolve(transformElasticResult(x, body))
@@ -367,31 +394,17 @@ function transformElasticResult(x, body) {
 					resolve()
 				} else {
 					indexAnswers(queryAnswers)
-					.then(() => {
+					.catch(reject)
+					/*.then(() => {
 						warehouseAnswers(queryAnswers)
 						.then(resolve)
 						.catch(reject)
 					})
-					.catch(reject)
+					.catch(reject)*/
 				}
 			}
 	 	})
  	})
-}
-
-/** 
- * Backup is to insert answers into our mongoDB warehouse
- */
-function warehouseAnswers(qAnswers) {
-	return new Promise((resolve, reject) => {
-		SDCQueryableAnswer.collection.insertMany(qAnswers, (err, docs) => {
-			if(err) {
-				reject(err)
-			} else {
-				resolve()
-			}
-		});
-	})
 }
 
 export default {
@@ -404,4 +417,3 @@ export default {
 	getClient: () => {return client},
 	hasClient
 }
-
